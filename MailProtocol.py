@@ -3,6 +3,7 @@ import time
 from typing import Dict
 from util import hexdump
 from APIParser import parseMail
+from Api.Api import BaseCommand
 
 
 class MailProtocol(asyncio.Protocol):
@@ -65,6 +66,21 @@ class MailProtocol(asyncio.Protocol):
         self.transport.write(frame)
         # print(f"Supervisory frame sent: {hexdump(frame, False)}")
 
+    def send(self, command: BaseCommand, program_id=0, task_id=1):
+        """
+        Send a command as an information frame.
+        :param params: Additional parameters (bytes)
+        :param program_id: Program ID byte
+        :param task_id: Task ID byte
+        """
+        command_bytes = command.to_bytes()
+        payload = bytes([program_id, task_id, *command_bytes])
+
+        self.send_information_frame(payload)
+        print(
+            f"Command sent: Program ID={program_id}, Task ID={task_id}, Payload={hexdump(bytes([*payload]), False)}"
+        )
+
     def send_command(
         self, program_id: int, task_id: int, primitive: int, params: bytes
     ):
@@ -82,7 +98,7 @@ class MailProtocol(asyncio.Protocol):
 
         self.send_information_frame(payload)
         print(
-            f"Command sent: Program ID={program_id}, Task ID={task_id}, Primitive=0x{primitive:2x}, Params={bytes([*params])}"
+            f"Command sent: Program ID={program_id}, Task ID={task_id}, Primitive=0x{primitive:2x}, Params={hexdump(bytes([*params]), False)}"
         )
 
     def handle_frame(self, data):
