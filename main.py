@@ -39,6 +39,7 @@ async def main():
     protocol.send(
         ApiFpGetFwVersionReq(),
     )
+
     await asyncio.sleep(1)
     print("Sending 'API_FP_MM_GET_ID_REQ' request command...")
     protocol.send(ApiFpMmGetIdReq())
