@@ -2,6 +2,7 @@ import asyncio
 import time
 from typing import Dict
 from util import hexdump
+from APIParser import parseMail
 
 
 class MailProtocol(asyncio.Protocol):
@@ -30,7 +31,7 @@ class MailProtocol(asyncio.Protocol):
         self.synced = False
         asyncio.get_event_loop().stop()
 
-    def send_sabm(self, pf = True):
+    def send_sabm(self, pf=True):
         header = 0xC8 if pf else 0xC0
         frame = bytes([0x10, 0x00, 0x01, header, header])
         self.transport.write(frame)
@@ -43,7 +44,7 @@ class MailProtocol(asyncio.Protocol):
         header = self.tx_seq << 4 | self.rx_seq
         # Set PollFinal bit
         if pf:
-            header  |= 0x08
+            header |= 0x08
         frame = bytes([0x10, 0x00, len(payload) + 1, header]) + payload
         checksum = (header + sum(payload)) & 0xFF
         frame += bytes([checksum])
@@ -52,7 +53,7 @@ class MailProtocol(asyncio.Protocol):
         self.tx_seq = (self.tx_seq + 1) % 8  # Wrap TxSeq
         self.transport.write(frame)
         print(
-            f"Information frame sent TxSeq={tx_seq}, self.TxSeq={self.tx_seq}:\n {hexdump(frame, True)}"
+            f"Information frame sent TxSeq={tx_seq}, self.TxSeq={self.tx_seq}:\n{hexdump(frame, True)}"
         )
 
     def send_supervisory_frame(self, su_id: int, pf=True):
@@ -114,9 +115,9 @@ class MailProtocol(asyncio.Protocol):
                     if rx_seq == self.tx_seq:
                         self.rx_seq = (self.rx_seq + 1) % 8
                         acked = True
-                    print(
-                        f"Valid information frame received: TxSeq={tx_seq}, self.TxSeq={self.tx_seq} RxSeq={rx_seq} Acked={acked} self.RxSeq={self.rx_seq} "
-                    )
+                    # # print(
+                    # #     f"Valid information frame received: TxSeq={tx_seq}, self.TxSeq={self.tx_seq} RxSeq={rx_seq} Acked={acked} self.RxSeq={self.rx_seq} "
+                    # # )
 
                     #    As per spec, at least 4 bytes are needed for Program Id + Task Id + Primitive
                     if len(payload) >= 4:
@@ -126,8 +127,9 @@ class MailProtocol(asyncio.Protocol):
                         mail_params = payload[4:]
 
                         print(
-                            f"Message Recieved: Program ID={program_id}, Task ID={task_id}, Primitive=0x{primitive:2x}, Params={mail_params}"
+                            f"Message Recieved: Program ID={program_id}, Task ID={task_id}, Primitive=0x{primitive:2x}, Params=\n{hexdump(mail_params)}"
                         )
+                        parseMail(primitive, mail_params)
 
                     else:
 
@@ -150,14 +152,13 @@ class MailProtocol(asyncio.Protocol):
                 unnumbered = header >> 6 & 0x01
                 su_id = (header >> 4) & 0x03
 
-                print(f"Control frame received: {hexdump(self.temp_buffer)}")
                 if unnumbered:
                     print(f"SABM frame received. SU_ID={su_id} pf={pf}")
                     if not self.synced and su_id == 0x00 and pf:
                         self.send_sabm(pf=False)
                 else:
                     rx_seq = header & 0x07
-                    
+
                     if len(self.temp_buffer) < 5:
                         print("Incomplete control frame, waiting for more data.")
                         break
@@ -167,14 +168,18 @@ class MailProtocol(asyncio.Protocol):
                             f"Receive Ready (RR) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
                         )
 
-                        if (rx_seq-1) % 8 in self.outstanding_frames:
-                            del self.outstanding_frames[(rx_seq-1)  % 8]
+                        if (rx_seq - 1) % 8 in self.outstanding_frames:
+                            del self.outstanding_frames[(rx_seq - 1) % 8]
                         self.resend_outstanding_frames()
                     elif su_id == 1:
-                        print(f"Reject (REJ) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}")
+                        print(
+                            f"Reject (REJ) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
+                        )
                         self.resend_outstanding_frames()
                     elif su_id == 2:
-                        print(f"Receiver Not Ready (RNR) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}")
+                        print(
+                            f"Receiver Not Ready (RNR) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
+                        )
                     elif su_id == 3:
                         print("Unnumbered control frame received.")
 

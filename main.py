@@ -17,14 +17,23 @@ async def main():
 
     asyncio.create_task(protocol.poll_timer())
 
-    await asyncio.sleep(5)
-    print("Sending 'CVM_PP_AUDIO_START_TONE_REQ' request command...")
+    await asyncio.sleep(2)
+    print("Sending 'API_FP_GET_FW_VERSION' request command...")
+
     protocol.send_command(
-            program_id=0,
-            task_id=1,
-            primitive=0x510B,
-            params=[0x01, 0xFF, 0xFF, 0x00, 0x00],
-        )
+        program_id=0,
+        task_id=1,
+        primitive=0x4002,
+        params=[],
+    )
+    print("Sending 'API_HAL_LED_REQ' request command...")
+
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x5902,
+        params=[0x02, 0x03, 0x01, 0x2C, 0x01, 0x00, 0x2C, 0x01, 0x02, 0x0A, 0x00],
+    )
 
     await asyncio.Future()
 
