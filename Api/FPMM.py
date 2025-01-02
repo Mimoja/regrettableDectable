@@ -1,25 +1,16 @@
-from enum import Enum
+from enum import IntEnum
 from ctypes import (
-    Structure,
     c_uint8,
-    c_uint16,
-    c_uint32,
-    c_ubyte,
-    Array,
-    sizeof,
-    cast,
-    POINTER,
 )
-from typing import Optional, Type
-from Api import BaseCommand
-from Commands import Commands
+from .Api import BaseCommand
+from .Commands import Commands
 
 # -----------------------------------------------------------------------------
 # Enumerations
 # -----------------------------------------------------------------------------
 
 
-class ApiMmRejectReasonType(Enum):
+class ApiMmRejectReasonType(IntEnum):
     MM_REJ_NO_REJECT_REASON = 0x00
     MM_REJ_TPUI_UNKNOWN = 0x01
     MM_REJ_IPUI_UNKNOWN = 0x02
@@ -46,13 +37,13 @@ class ApiMmRejectReasonType(Enum):
     MM_REJ_PLMN_NOT_ALLOWED = 0x76
 
 
-class ApiMmProtocolPcmSyncType(Enum):
+class ApiMmProtocolPcmSyncType(IntEnum):
     SLAVE = 0x00
     MASTER = 0x01
     SLAVE_1_FS_DELAY = 0x02
 
 
-class ApiMmRegistrationModeType(Enum):
+class ApiMmRegistrationModeType(IntEnum):
     DISABLED = 0x00
     CONTINUOUS = 0x01
     SINGLE = 0x02
@@ -84,6 +75,11 @@ class ApiFpMmGetIdCfm(BaseCommand):
         """Override to parse dynamically sized data."""
         obj = super().from_bytes(data)
         return cls(obj.Status, bytes(obj.Id))
+
+
+class ApiFpMmGetAccessCodeReq(BaseCommand):
+    def __init__(self):
+        self.Primitive = Commands.API_FP_MM_GET_ACCESS_CODE_REQ
 
 
 class ApiFpMmSetAccessCodeReq(BaseCommand):
