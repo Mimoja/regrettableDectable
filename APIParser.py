@@ -1,5 +1,10 @@
 def parseMail(primitive, params):
     match primitive:
+        case 0x4001:
+            print(
+                "API_FP_RESET_IND received:",
+                "Success" if params[0] == 0 else f"Error: {params[0]}",
+            )
         case 0x4003:
             print("API_FP_GET_FW_VERSION_CFM received.")
             print(
@@ -9,36 +14,35 @@ def parseMail(primitive, params):
                 f"Link Date: {params[7]:02}/{params[6]:02}/{params[5]:02} at {params[8]:02}:{params[9]:02}"
             )
             # Mode can be changed with an API_PROD_TEST_REQ command
-            # print(f"Dect mode: {params[10]}")
-            dect_mode_id = params[10]
             dect_mode = ""
 
-            if dect_mode_id == 0:
-                dect_mode = "EU"
-            elif dect_mode_id == 1:
-                dect_mode = "US"
-            elif dect_mode_id == 2:
-                dect_mode = "SA"
-            elif dect_mode_id == 3:
-                dect_mode = "Taiwan"
-            elif dect_mode_id == 4:
-                dect_mode = "Malaysia"
-            elif dect_mode_id == 5:
-                dect_mode = "China"
-            elif dect_mode_id == 6:
-                dect_mode = "Thailand"
-            elif dect_mode_id == 7:
-                dect_mode = "Brazil"
-            elif dect_mode_id == 8:
-                dect_mode = "US Extended"
-            elif dect_mode_id == 9:
-                dect_mode = "Korea"
-            elif dect_mode_id == 10:
-                dect_mode = "Japan (2ch)"
-            elif dect_mode_id == 11:
-                dect_mode = "Japan (5ch)"
-            else:
-                dect_mode = "Invalid"
+            match params[10]:
+                case 0:
+                    dect_mode = "EU"
+                case 1:
+                    dect_mode = "US"
+                case 2:
+                    dect_mode = "SA"
+                case 3:
+                    dect_mode = "Taiwan"
+                case 4:
+                    dect_mode = "Malaysia"
+                case 5:
+                    dect_mode = "China"
+                case 6:
+                    dect_mode = "Thailand"
+                case 7:
+                    dect_mode = "Brazil"
+                case 8:
+                    dect_mode = "US Extended"
+                case 9:
+                    dect_mode = "Korea"
+                case 10:
+                    dect_mode = "Japan (2ch)"
+                case 11:
+                    dect_mode = "Japan (5ch)"
+                case _:
+                    dect_mode = "Invalid"
 
             print(f"DECT mode: {dect_mode}")
         case 0x4005:
@@ -67,6 +71,15 @@ def parseMail(primitive, params):
             print("API_FP_MM_HANDSET_PRESENT_IND received.")
             print("New handset present!")
             print("Handset ID", params[0])
+        case 0x4FFF:
+            print(
+                f"API_PROD_TEST_CFM received. OpCode: {params[1]:02x} {params[0]:02x}"
+            )
+        case 0x5803:
+            print(
+                "API_IMAGE_ACTIVATE_CFM received:",
+                "Success" if params[0] == 0 else f"Error: {params[0]}",
+            )
 
         case 0x5903:
             print("API_HAL_LED_CFM  received.")

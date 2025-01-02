@@ -19,21 +19,6 @@ async def main():
 
     await asyncio.sleep(2)
 
-    # Uncomment to set region
-    # print("Sending 'API_PROD_TEST_REQ' request command...")
-    # protocol.send_command(
-    #     program_id=0,
-    #     task_id=1,
-    #     primitive=0x4FFE,  # API_PROD_TEST_REQ
-    #     params=[
-    #         0x00,
-    #         0x02,  # SET_DECT_MODE
-    #         0x00,
-    #         0x01,  # Parameter len
-    #         0x00,  # EU
-    #     ],
-    # )
-
     print("Sending 'API_FP_GET_FW_VERSION' request command...")
 
     protocol.send_command(
@@ -68,8 +53,80 @@ async def main():
     )
 
     await asyncio.sleep(2)
-    print("==== Entering registration mode ====")
 
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x5802,  # API_IMAGE_ACTIVATE_REQ
+        params=[
+            0xFF,
+            0,
+        ],  # Image index (just wake up), Activate co-located applications
+    )
+    await asyncio.sleep(2)
+
+    # Image list (got with API_IMAGE_INFO_REQ):
+    # 0: CVM441FPNATALIEV3_FPCVM_V1183_B0000
+    # 1: CVM441PPNATALIEV3_FPCVM_V1183_B0000
+
+    print("Activating FP image...")
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x5802,  # API_IMAGE_ACTIVATE_REQ
+        params=[0, 0],  # Image index, Activate co-located applications
+    )
+    await asyncio.sleep(2)
+
+    print("Defaulting FP settings...")
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x4FFE,  # API_PROD_TEST_REQ
+        params=[
+            0x02,
+            0x01,  # PT_CMD_NVS_DEFAULT
+            0x01,
+            0x00,  # Parameter len
+            0x00,  # Do not factory reset adjusted parameters
+        ],
+    )
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x5802,  # API_IMAGE_ACTIVATE_REQ
+        params=[
+            0xFF,
+            0,
+        ],  # Image index (just wake up), Activate co-located applications
+    )
+    await asyncio.sleep(2)
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x5802,  # API_IMAGE_ACTIVATE_REQ
+        params=[
+            0xFF,
+            0,
+        ],  # Image index (just wake up), Activate co-located applications
+    )
+    await asyncio.sleep(2)
+
+    print("Sending 'API_PROD_TEST_REQ' request command...")
+    protocol.send_command(
+        program_id=0,
+        task_id=1,
+        primitive=0x4FFE,  # API_PROD_TEST_REQ
+        params=[
+            0x00,
+            0x02,  # SET_DECT_MODE
+            0x01,  # Parameter len
+            0x00,
+            0x00,  # EU
+        ],
+    )
+
+    print("==== Entering registration mode ====")
     protocol.send_command(
         program_id=0,
         task_id=1,
