@@ -1,4 +1,4 @@
-from .Api import FPCommand
+from .Api import PPCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -8,30 +8,30 @@ from ctypes import c_uint8, c_uint16, c_uint32, Structure
 # -----------------------------------------------------------------------------
 
 
-class ApiFpResetReq(FPCommand):
+class ApiPpResetReq(PPCommand):
 
     def __init__(self):
-        self.Primitive = Commands.API_FP_RESET_REQ
+        self.Primitive = Commands.API_PP_RESET_REQ
 
 
-class ApiFpResetInd(FPCommand):
+class ApiPpResetInd(PPCommand):
 
     _fields_ = [
         ("Status", c_uint8),
     ]
 
     def __init__(self, status: int):
-        self.Primitive = Commands.API_FP_RESET_IND
+        self.Primitive = Commands.API_PP_RESET_IND
         self.Status = status
 
 
-class ApiFpGetFwVersionReq(FPCommand):
+class ApiPpGetFwVersionReq(PPCommand):
 
     def __init__(self):
-        self.Primitive = Commands.API_FP_GET_FW_VERSION_REQ
+        self.Primitive = Commands.API_PP_GET_FW_VERSION_REQ
 
 
-class ApiFpGetFwVersionCfm(FPCommand):
+class ApiPpGetFwVersionCfm(PPCommand):
 
     _fields_ = [
         ("Status", c_uint8),
@@ -42,38 +42,41 @@ class ApiFpGetFwVersionCfm(FPCommand):
         ("InfoElement", c_uint8 * 1),  # Placeholder for variable-length field
     ]
 
-    def __init__(self, status: int, version_hex: int, link_date: bytes, dect_type: int):
-        self.Primitive = Commands.API_FP_GET_FW_VERSION_CFM
+    def __init__(
+        self,
+        status: int,
+        version_hex: int,
+        link_date: bytes,
+        dect_type: int,
+        info_element: bytes,
+    ):
+        self.Primitive = Commands.API_PP_GET_FW_VERSION_CFM
         self.Status = status
         self.VersionHex = version_hex
         if len(link_date) != 5:
             raise ValueError("LinkDate must be 5 bytes")
         self.LinkDate = (c_uint8 * 5)(*link_date)
         self.DectType = dect_type
-        self.InfoElementLength = 0
-        self.InfoElement = (c_uint8 * 1)()
 
-    def set_info_element(self, info_element: bytes):
-        """Set the optional InfoElement."""
         self.InfoElementLength = len(info_element)
-        self.InfoElement = (c_uint8 * len(info_element))(*info_element)
+        self.set_array(self.InfoElement, (c_uint8 * len(info_element))(*info_element))
 
 
-class ApiFpSetCradleStatusReq(FPCommand):
+class ApiPpSetCradleStatusReq(PPCommand):
 
     _fields_ = [
         ("ApiCradleStatus", c_uint8),  # Placeholder for ApiCradleStatusType
     ]
 
     def __init__(self, cradle_status: int):
-        self.Primitive = Commands.API_FP_SET_CRADLE_STATUS_REQ
+        self.Primitive = Commands.API_PP_SET_CRADLE_STATUS_REQ
         self.ApiCradleStatus = cradle_status
 
 
-class ApiFpCradleDetectReq(FPCommand):
+class ApiPpCradleDetectReq(PPCommand):
 
     def __init__(self):
-        self.Primitive = Commands.API_FP_CRADLE_DETECT_REQ
+        self.Primitive = Commands.API_PP_CRADLE_DETECT_REQ
 
 
 class ApiTimeDateCodeType(Structure):
@@ -118,7 +121,7 @@ class ApiTimeDateCodeType(Structure):
         self.TimeZone = time_zone
 
 
-class ApiFpSetTimeReq(FPCommand):
+class ApiPpSetTimeReq(PPCommand):
 
     _fields_ = [
         ("Coding", c_uint8),  # Placeholder for ApiTimeDateCodingType
@@ -129,52 +132,24 @@ class ApiFpSetTimeReq(FPCommand):
     def __init__(
         self, coding: int, interpretation: int, time_date_code: ApiTimeDateCodeType
     ):
-        self.Primitive = Commands.API_FP_SET_TIME_REQ
+        self.Primitive = Commands.API_PP_SET_TIME_REQ
         self.Coding = coding
         self.Interpretation = interpretation
         self.ApiTimeDateCode = time_date_code
 
 
-class ApiFpGetTimeReq(FPCommand):
+class ApiPpGetTimeReq(PPCommand):
 
     def __init__(self):
-        self.Primitive = Commands.API_FP_GET_TIME_REQ
+        self.Primitive = Commands.API_PP_GET_TIME_REQ
 
 
-class ApiFpSyncTimeReq(FPCommand):
+class ApiPpSyncTimeReq(PPCommand):
 
     _fields_ = [
         ("TerminalId", c_uint16),
     ]
 
     def __init__(self, terminal_id: int):
-        self.Primitive = Commands.API_FP_SYNC_TIME_REQ
+        self.Primitive = Commands.API_PP_SYNC_TIME_REQ
         self.TerminalId = terminal_id
-
-
-class ApiFpSetFeaturesReq(FPCommand):
-    _fields_ = [
-        ("ApiFpFeature", c_uint8),
-    ]
-
-    def __init__(self, features: int):
-        self.Primitive = Commands.API_FP_SET_FEATURES_REQ
-        self.ApiFpFeature = features
-
-
-class ApiFpGetFeaturesReq(FPCommand):
-
-    def __init__(self):
-        self.Primitive = Commands.API_FP_GET_FEATURES_REQ
-
-
-class ApiFpGetFeaturesCfm(FPCommand):
-    _fields_ = [
-        ("CurrentFeatures", c_uint8),
-        ("AvailableFeatures", c_uint8),
-    ]
-
-    def __init__(self, current_features: int, available_features: int):
-        self.Primitive = Commands.API_FP_GET_FEATURES_CFM
-        self.CurrentFeatures = current_features
-        self.AvailableFeatures = available_features

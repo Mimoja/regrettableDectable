@@ -5,11 +5,12 @@ from ctypes import (
     cast,
     sizeof,
 )
+import ctypes
 
-from enum import Enum
+from enum import Enum, auto, IntEnum
 
 
-class RsStatusType(Enum):
+class RsStatusType(IntEnum):
     RSS_SUCCESS = 0x00  # The request completed successfully.
     RSS_NOT_SUPPORTED = 0x01  # The request is not supported.
     RSS_BAD_ARGUMENTS = 0x02  # One or more arguments are not correct.
@@ -73,6 +74,13 @@ class RsStatusType(Enum):
     RSS_MAX = 0xFF  # Maximum value.
 
 
+class ApiComponent(Enum):
+    SYSTEM = auto()
+    PP = auto()
+    FP = auto()
+    UNKNOWN = auto()
+
+
 class BaseCommand(Structure):
     """Base class for all commands."""
 
@@ -85,9 +93,65 @@ class BaseCommand(Structure):
         """Serializes the command to bytes."""
         return bytes(self)
 
+    def set_array(self, entry, data):
+        # We cannot access data[0] to get the size on zero sized arrays
+        # therefore we trust that the single element array is enoug
+        size = ctypes.sizeof(entry)
+
+        try:
+            size = ctypes.sizeof(data[0])
+        except TypeError:
+            pass
+        except ValueError:
+            pass
+        ctypes.resize(self, ctypes.sizeof(self) + size * (len(data) - 1))
+        ctypes.memmove(entry, data, ctypes.sizeof(data))
+
+    def get_component(self):
+        return ApiComponent.SYSTEM
+
+    @staticmethod
+    def _set_size(entry, new_size):
+        address = id(entry)
+        print(hex(address))
+        # the incredibly illegal version
+        # 1. get memory offset of b_length field in raw pyobject memory (assuming at least 32 bit)
+        _tdata = (ctypes.c_int16 * 0x4ACAFFEE).from_address(0)
+        memfield = (ctypes.c_char * 0x100).from_address(id(_tdata))
+        _loc = bytes(memfield).find(bytes(ctypes.c_size_t(len(_tdata))))
+        assert _loc != -1, "Could not find b_length field"
+
+        # 2. change our size at previously determined offset
+
+        print(hex(address))
+        b_size = (ctypes.c_size_t).from_address(
+            address + _loc - ctypes.sizeof(ctypes.c_size_t)
+        )
+        b_length = (ctypes.c_size_t).from_address(address + _loc)
+        print(b_length, b_size)
+
+        b_size.value = b_size.value // b_length.value * new_size
+        b_length.value = new_size
+        print(b_length, b_size)
+        # print("sanity check:", len(entry), entry)
+        return entry
+
     @classmethod
     def from_bytes(cls, data: bytes) -> "BaseCommand":
         """Deserializes bytes into a command object."""
         if len(data) < sizeof(cls):
             raise ValueError(f"Data too short for {cls.__name__}")
         return cast(data, POINTER(cls)).contents
+
+    def primitive(self):
+        return self.Primitive
+
+
+class FPCommand(BaseCommand):
+    def get_component(self):
+        return ApiComponent.FP
+
+
+class PPCommand(BaseCommand):
+    def get_component(self):
+        return ApiComponent.PP

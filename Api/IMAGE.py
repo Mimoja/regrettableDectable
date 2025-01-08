@@ -27,51 +27,38 @@ class ApiImageInfoReq(BaseCommand):
         self.ImageIndex = image
 
 
-def ApiImageInfoCfm(
-    status: RsStatusType,
-    image: int,
-    image_id: int,
-    device_id: int,
-    link_date: bytes,
-    name_length: int,
-    data: bytes,
-):
-    class ApiImageInfoCfmClass(BaseCommand):
+class ApiImageInfoCfm(BaseCommand):
 
-        _fields_ = [
-            ("Status", c_uint8),
-            ("ImageIndex", c_uint8),
-            ("ImageId", c_uint32),
-            ("DeviceId", c_uint32),
-            ("LinkDate", c_uint8 * 5),
-            ("NameLength", c_uint8),
-            ("LabelLength", c_uint8),
-            ("Data", c_ubyte * 1),
-        ]
+    _fields_ = [
+        ("Status", c_uint8),
+        ("ImageIndex", c_uint8),
+        ("ImageId", c_uint32),
+        ("DeviceId", c_uint32),
+        ("LinkDate", c_uint8 * 5),
+        ("NameLength", c_uint8),
+        ("LabelLength", c_uint8),
+        ("Data", c_ubyte * 1),
+    ]
 
-        def __init__(
-            self,
-            status: RsStatusType,
-            image: ApiImageID,
-            image_id: int,
-            device_id: int,
-            link_date: bytes,
-            name_length: int,
-            data: bytes,
-        ):
-            self.Primitive = Commands.API_IMAGE_INFO_CFM
-            self.Status = status
-            self.ImageIndex = image
-            self.ImageId = image_id
-            self.DeviceId = device_id
-            self.LinkDate = (c_uint8 * 5)(*link_date)
-            self.NameLength = name_length
-            self.LabelLength = len(data)
-            self.Data = (c_ubyte * len(data))(*data)
-
-    return ApiImageInfoCfmClass(
-        status, image, image_id, device_id, link_date, name_length, data
-    )
+    def __init__(
+        self,
+        status: RsStatusType,
+        image: ApiImageID,
+        image_id: int,
+        device_id: int,
+        link_date: bytes,
+        name_length: int,
+        data: bytes,
+    ):
+        self.Primitive = Commands.API_IMAGE_INFO_CFM
+        self.Status = status
+        self.ImageIndex = image
+        self.ImageId = image_id
+        self.DeviceId = device_id
+        self.LinkDate = (c_uint8 * 5)(*link_date)
+        self.NameLength = name_length
+        self.LabelLength = len(data)
+        self.set_array(self.Data, (c_ubyte * len(data))(*data))
 
 
 class ApiImageActivateReq(BaseCommand):

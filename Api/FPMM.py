@@ -2,7 +2,7 @@ from enum import IntEnum
 from ctypes import (
     c_uint8,
 )
-from .Api import BaseCommand
+from .Api import FPCommand
 from .Commands import Commands
 
 # -----------------------------------------------------------------------------
@@ -54,13 +54,13 @@ class ApiMmRegistrationModeType(IntEnum):
 # -----------------------------------------------------------------------------
 
 
-class ApiFpMmGetIdReq(BaseCommand):
+class ApiFpMmGetIdReq(FPCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_MM_GET_ID_REQ
 
 
-class ApiFpMmGetIdCfm(BaseCommand):
+class ApiFpMmGetIdCfm(FPCommand):
     _fields_ = [("Status", c_uint8), ("Id", c_uint8 * 5)]
 
     def __init__(self, status: int, id_bytes: bytes):
@@ -70,19 +70,13 @@ class ApiFpMmGetIdCfm(BaseCommand):
             raise ValueError("Id must be 5 bytes")
         self.Id = (c_uint8 * 5)(*id_bytes)
 
-    @classmethod
-    def from_bytes(cls, data: bytes) -> "ApiFpMmGetIdCfm":
-        """Override to parse dynamically sized data."""
-        obj = super().from_bytes(data)
-        return cls(obj.Status, bytes(obj.Id))
 
-
-class ApiFpMmGetAccessCodeReq(BaseCommand):
+class ApiFpMmGetAccessCodeReq(FPCommand):
     def __init__(self):
         self.Primitive = Commands.API_FP_MM_GET_ACCESS_CODE_REQ
 
 
-class ApiFpMmSetAccessCodeReq(BaseCommand):
+class ApiFpMmSetAccessCodeReq(FPCommand):
     _fields_ = [
         ("Ac", c_uint8 * 4),
     ]
@@ -94,7 +88,7 @@ class ApiFpMmSetAccessCodeReq(BaseCommand):
         self.Ac = (c_uint8 * 4)(*access_code)
 
 
-class ApiFpMmGetAccessCodeCfm(BaseCommand):
+class ApiFpMmGetAccessCodeCfm(FPCommand):
     _fields_ = [("Status", c_uint8), ("Ac", c_uint8 * 4)]
 
     def __init__(self, status: int, access_code: bytes):
@@ -105,7 +99,7 @@ class ApiFpMmGetAccessCodeCfm(BaseCommand):
         self.Ac = (c_uint8 * 4)(*access_code)
 
 
-class ApiFpMmSetNameReq(BaseCommand):
+class ApiFpMmSetNameReq(FPCommand):
     _fields_ = [
         ("Length", c_uint8),
         ("Data", c_uint8 * 1),  # Placeholder for dynamic field
@@ -114,14 +108,10 @@ class ApiFpMmSetNameReq(BaseCommand):
     def __init__(self, name: str):
         self.Primitive = Commands.API_FP_MM_SET_NAME_REQ
         self.Length = len(name)
-        self.Data = (c_uint8 * self.Length)(*name.encode())
-
-    def send(self) -> bytes:
-        """Override to handle dynamic field."""
-        return bytes(self) + bytes(self.Data[: self.Length])
+        self.set_array(self.Data, (c_uint8 * self.Length)(*name.encode()))
 
 
-class ApiFpMmGetNameCfm(BaseCommand):
+class ApiFpMmGetNameCfm(FPCommand):
     _fields_ = [
         ("Status", c_uint8),
         ("Max", c_uint8),
@@ -134,10 +124,15 @@ class ApiFpMmGetNameCfm(BaseCommand):
         self.Status = status
         self.Max = max_len
         self.Length = len(name)
-        self.Data = (c_uint8 * self.Length)(*name.encode())
+        self.set_array(self.Data, (c_uint8 * self.Length)(*name.encode()))
 
-    @classmethod
-    def from_bytes(cls, data: bytes) -> "ApiFpMmGetIdCfm":
-        """Override to parse dynamically sized data."""
-        obj = super().from_bytes(data)
-        return cls(obj.Status, bytes(obj.Id))
+
+class ApiFpMmGetAccessCodeCfm(FPCommand):
+    _fields_ = [("Status", c_uint8), ("Ac", c_uint8 * 4)]
+
+    def __init__(self, status: int, access_code: bytes):
+        self.Primitive = Commands.API_FP_MM_GET_ACCESS_CODE_CFM
+        self.Status = status
+        if len(access_code) != 4:
+            raise ValueError("Access code must be 4 bytes")
+        self.Ac = (c_uint8 * 4)(*access_code)

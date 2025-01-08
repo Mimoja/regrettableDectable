@@ -1,5 +1,50 @@
 from Api.Commands import Commands
-from Api.IMAGE import ApiImageActivateCfm
+from Api.IMAGE import ApiImageActivateCfm, ApiImageInfoCfm
+from Api.PROD import ApiProdTestCfm
+from termcolor import colored
+from Api.PPGENERAL import ApiPpGetFwVersionCfm
+from Api.FPGENERAL import ApiFpGetFwVersionCfm
+from enum import Enum
+from Api.PROD import DectMode
+from Api.PPMM import (
+    ApiPpMmFpNameInd,
+    ApiPpMmRegistrationSearchInd,
+    ApiPpMmRegistrationFailedInd,
+    ApiPpMmRejectReasonType,
+)
+
+
+def dectMode(mode_id: int):
+    dect_mode = ""
+    match DectMode(mode_id):
+        case DectMode.EU:
+            dect_mode = "EU"
+        case DectMode.US:
+            dect_mode = "US"
+        case DectMode.SA:
+            dect_mode = "SA"
+        case DectMode.Taiwan:
+            dect_mode = "Taiwan"
+        case DectMode.Malaysia:
+            dect_mode = "Malaysia"
+        case DectMode.China:
+            dect_mode = "China"
+        case DectMode.Thailand:
+            dect_mode = "Thailand"
+        case DectMode.Brazil:
+            dect_mode = "Brazil"
+        case DectMode.US_Extended:
+            dect_mode = "US Extended"
+        case DectMode.Korea:
+            dect_mode = "Korea"
+        case DectMode.Japan_2ch:
+            dect_mode = "Japan (2ch)"
+        case DectMode.Japan_5ch:
+            dect_mode = "Japan (5ch)"
+        case _:
+            dect_mode = "Invalid"
+    return dect_mode
+
 
 def parseMail(primitive, params):
     payload = bytes([primitive & 0xFF, primitive >> 8, *params])
@@ -9,46 +54,13 @@ def parseMail(primitive, params):
                 "API_FP_RESET_IND received:",
                 "Success" if params[0] == 0 else f"Error: {params[0]}",
             )
+
+        case Commands.API_PP_GET_FW_VERSION_CFM:
+            print("API_PP_GET_FW_VERSION_CFM received.")
+            return ApiPpGetFwVersionCfm.from_bytes(payload)
         case Commands.API_FP_GET_FW_VERSION_CFM:
             print("API_FP_GET_FW_VERSION_CFM received.")
-            print(
-                f"Version: {params[3]:02x}{params[2]:02x}{params[1]:02x}{params[0]:02x}"
-            )
-            print(
-                f"Link Date: {params[7]:02}/{params[6]:02}/{params[5]:02} at {params[8]:02}:{params[9]:02}"
-            )
-            # Mode can be changed with an API_PROD_TEST_REQ command
-            dect_mode = ""
-
-            match params[10]:
-                case 0:
-                    dect_mode = "EU"
-                case 1:
-                    dect_mode = "US"
-                case 2:
-                    dect_mode = "SA"
-                case 3:
-                    dect_mode = "Taiwan"
-                case 4:
-                    dect_mode = "Malaysia"
-                case 5:
-                    dect_mode = "China"
-                case 6:
-                    dect_mode = "Thailand"
-                case 7:
-                    dect_mode = "Brazil"
-                case 8:
-                    dect_mode = "US Extended"
-                case 9:
-                    dect_mode = "Korea"
-                case 10:
-                    dect_mode = "Japan (2ch)"
-                case 11:
-                    dect_mode = "Japan (5ch)"
-                case _:
-                    dect_mode = "Invalid"
-
-            print(f"DECT mode: {dect_mode}")
+            return ApiFpGetFwVersionCfm.from_bytes(payload)
         case Commands.API_FP_MM_GET_ID_CFM:
             print("API_FP_MM_GET_ID_CFM received.")
             print(f"ID: {params[1]:02x}{params[2]:02x}{params[3]:02x}{params[4]:02x}")
@@ -75,15 +87,36 @@ def parseMail(primitive, params):
             print("API_FP_MM_HANDSET_PRESENT_IND received.")
             print("New handset present!")
             print("Handset ID", params[0])
+        case Commands.API_PP_MM_FP_NAME_IND:
+            print("API_PP_MM_FP_NAME_IND received.")
+            return ApiPpMmFpNameInd.from_bytes(payload)
+        case Commands.API_PP_MM_REGISTRATION_SEARCH_IND:
+            print("API_PP_MM_REGISTRATION_SEARCH_IND received.")
+            return ApiPpMmRegistrationSearchInd.from_bytes(payload)
+        case Commands.API_PROD_TEST_REQ:
+            print(
+                f"API_PROD_TEST_REQ received. OpCode: {params[1]:02x} {params[0]:02x}"
+            )
         case Commands.API_PROD_TEST_CFM:
             print(
                 f"API_PROD_TEST_CFM received. OpCode: {params[1]:02x} {params[0]:02x}"
             )
+            cfm = ApiProdTestCfm.from_bytes(payload)
+            print("Opcode", cfm.Opcode)
+            print("Param Length=", cfm.ParameterLength)
+            print("Parameters=", cfm.getParameters())
+            return cfm
         case Commands.API_IMAGE_ACTIVATE_CFM:
             print(
                 "API_IMAGE_ACTIVATE_CFM received:",
                 "Success" if params[0] == 0 else f"Error: {params[0]}",
             )
+        case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
+            print("API_PP_MM_REGISTRATION_FAILED_IND received.")
+            print(colored("Registration failed!", "red"))
+            ind = ApiPpMmRegistrationFailedInd.from_bytes(payload)
+            print("Reason", ApiPpMmRejectReasonType(ind.Reason).name)
+            return ind
 
         case Commands.API_HAL_LED_CFM:
             print("API_HAL_LED_CFM  received.")
@@ -101,7 +134,34 @@ def parseMail(primitive, params):
             print("API_FP_RESET_IND received.")
         case Commands.API_PP_BAT_NON_CHARGEABLE_IND:
             print("API_PP_BAT_NON_CHARGEABLE_IND received.")
-        case Commands.API_PROD_TEST_CFM:
-            print("API_PROD_TEST_CFM received.")
+        case Commands.API_PP_BAT_CAPACITY_IND:
+            print("API_PP_BAT_CAPACITY_IND received")
+        case Commands.API_PP_BAT_CHARGE_IND:
+            print("API_PP_BAT_CHARGE_IND received")
+        case Commands.API_IMAGE_INFO_CFM:
+            print("API_IMAGE_INFO_CFM received")
+            try:
+                cfm = ApiImageInfoCfm.from_bytes(payload)
+                print("Status", cfm.Status)
+                print("ImageIndex", cfm.ImageIndex)
+                print("ImageId", cfm.ImageId)
+                print("DeviceId", cfm.DeviceId)
+                print("LinkDate", cfm.LinkDate)
+                print("NameLength", cfm.NameLength)
+                print("LabelLength", cfm.LabelLength)
+                print("Data", cfm.Data.decode("utf-8"))
+            except Exception:
+                pass
+
+        case Commands.RTX_EAP_TARGET_RESET_IND:
+            print("RTX_EAP_TARGET_RESET_IND recieved")
+            print("=================================")
+            print("TARGET RESET")
+            print("=================================")
+
         case _:
-            print("Unknown primitive: ", hex(primitive))
+            print(
+                colored("Unknown primitive: ", "blue"),
+                colored(Commands(primitive).name, "blue"),
+            )
+            return
