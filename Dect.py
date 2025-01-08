@@ -93,8 +93,12 @@ class DECT:
 
         try:
             await asyncio.wait_for(event.wait(), timeout=timeout)
-            response = self.pending_requests[primitive]["response"]
-            del self.pending_requests[primitive]
+            response = None
+            for prim in primitive:
+                if prim in self.pending_requests:
+                    if response is None:
+                        response = self.pending_requests[prim]["response"]
+                    del self.pending_requests[prim]
             return response
         except asyncio.TimeoutError:
             print(f"[DECT] Timeout for collecting  {Commands(primitive).name}")

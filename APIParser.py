@@ -113,11 +113,7 @@ def parseMail(primitive, params):
             )
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             print("API_PP_MM_REGISTRATION_FAILED_IND received.")
-            print(colored("Registration failed!", "red"))
-            ind = ApiPpMmRegistrationFailedInd.from_bytes(payload)
-            print("Reason", ApiPpMmRejectReasonType(ind.Reason).name)
-            return ind
-
+            return ApiPpMmRegistrationFailedInd.from_bytes(payload)
         case Commands.API_HAL_LED_CFM:
             print("API_HAL_LED_CFM  received.")
             print("LEDs toggled.")

@@ -109,50 +109,68 @@ async def main():
         )
     )
 
-    print(
-        colored(
-            "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...", "yellow"
-        )
-    )
+    print(colored("Trying auto registration", "green"))
+
     await dct.command(
-        ApiPpMmRegistrationSearchReq(ApiMmSearchModeType.API_MM_CONTINOUS_SEARCH),
-        max_retries=1,
-        timeout=0,
+        ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
     )
 
-    baseStation = await dct.wait_for(
-        Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
-    )
-
-    if not baseStation:
+    baseStationName = await dct.wait_for(Commands.API_PP_MM_FP_NAME_IND, timeout=40)
+    if not baseStationName:
         print(colored("Base Station not found!", "red"))
         sys.exit(1)
+
     print(colored("Base Station found!", "green"))
-    print(baseStation.caps())
+    print(baseStationName.caps())
 
-    await dct.command(
-        ApiPpMmRegistrationSelectedReq(
-            subscription_no=1,
-            ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
-            rfpi=baseStation.Rfpi,
-        ),
-        max_retries=1,
-        timeout=0,
-    )
+    # print(
+    #     colored(
+    #         "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...", "yellow"
+    #     )
+    # )
+    # await dct.command(
+    #     ApiPpMmRegistrationSearchReq(ApiMmSearchModeType.API_MM_CONTINOUS_SEARCH),
+    #     max_retries=1,
+    #     timeout=0,
+    # )
 
-    status = await dct.wait_for(
-        [
-            Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
-            Commands.API_PP_MM_REGISTRATION_FAILED_IND,
-        ],
-        timeout=40,
-    )
-    if status:
-        if status.Primitive == Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
-            print(colored("Registration complete!", "green"))
-        else:
-            print(colored("Registration failed!", "red"))
-            print(status.Reason)
+    # baseStation = await dct.wait_for(
+    #     Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
+    # )
+
+    # if not baseStation:
+    #     print(colored("Base Station not found!", "red"))
+    #     sys.exit(1)
+    # print(colored("Base Station found!", "green"))
+    # print(baseStation.caps())
+
+    # await dct.command(
+    #     ApiPpMmRegistrationSelectedReq(
+    #         subscription_no=1,
+    #         ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
+    #         rfpi=baseStation.Rfpi,
+    #     ),
+    #     max_retries=1,
+    #     timeout=0,
+    # )
+
+    # status = await dct.wait_for(
+    #     [
+    #         Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
+    #         Commands.API_PP_MM_REGISTRATION_FAILED_IND,
+    #     ],
+    #     timeout=40,
+    # )
+    # if status:
+    #     if status.Primitive == Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
+    #         print(colored("Registration complete!", "green"))
+    #     else:
+    #         print(colored("Registration failed!", "red"))
+    #         print(status.Reason)
+    #         await dct.command(
+    #             ApiPpMmRegistrationAutoReq(0, bytes([0xFF, 0xFF, 0x00, 0x00])),
+    #             max_retries=1,
+    #         )
 
     await asyncio.Future()
 
