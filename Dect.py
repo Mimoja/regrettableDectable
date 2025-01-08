@@ -101,7 +101,9 @@ class DECT:
                     del self.pending_requests[prim]
             return response
         except asyncio.TimeoutError:
-            print(f"[DECT] Timeout for collecting  {Commands(primitive).name}")
+            for prim in primitive:
+                print(f"[DECT] Timeout for collecting  {Commands(prim).name}")
+                del self.pending_requests[prim]
             return None
 
     async def sync(self, timeout=1.0):

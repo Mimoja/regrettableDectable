@@ -109,10 +109,33 @@ async def main():
         )
     )
 
+    print(
+        colored(
+            "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...", "yellow"
+        )
+    )
+    await dct.command(
+        ApiPpMmRegistrationSearchReq(ApiMmSearchModeType.API_MM_CONTINOUS_SEARCH),
+        max_retries=1,
+        timeout=0,
+    )
+
+    baseStation = await dct.wait_for(
+        Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
+    )
+
+    if not baseStation:
+        print(colored("Base Station not found!", "red"))
+        sys.exit(1)
+    print(colored("Base Station found!", "green"))
+    print(baseStation.caps())
+
     print(colored("Trying auto registration", "green"))
 
     await dct.command(
         ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
+        max_retries=1,
+        timeout=0,
     )
 
     baseStationName = await dct.wait_for(Commands.API_PP_MM_FP_NAME_IND, timeout=40)
@@ -121,28 +144,7 @@ async def main():
         sys.exit(1)
 
     print(colored("Base Station found!", "green"))
-    print(baseStationName.caps())
-
-    # print(
-    #     colored(
-    #         "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...", "yellow"
-    #     )
-    # )
-    # await dct.command(
-    #     ApiPpMmRegistrationSearchReq(ApiMmSearchModeType.API_MM_CONTINOUS_SEARCH),
-    #     max_retries=1,
-    #     timeout=0,
-    # )
-
-    # baseStation = await dct.wait_for(
-    #     Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
-    # )
-
-    # if not baseStation:
-    #     print(colored("Base Station not found!", "red"))
-    #     sys.exit(1)
-    # print(colored("Base Station found!", "green"))
-    # print(baseStation.caps())
+    print(baseStationName)
 
     # await dct.command(
     #     ApiPpMmRegistrationSelectedReq(
