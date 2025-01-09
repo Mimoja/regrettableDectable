@@ -25,12 +25,21 @@ class DECT:
         """
         print(f"Connecting to {self.port} at {self.baudrate} baud...")
         loop = asyncio.get_running_loop()
-        _, protocol = await serial_asyncio.create_serial_connection(
+        transport, protocol = await serial_asyncio.create_serial_connection(
             loop, lambda: MailProtocol(self.received), self.port, self.baudrate
         )
-
+        protocol.transport = transport
         self.protocol = protocol
-        protocol.transport = self
+
+        while True:
+            try:
+                evnt = self.protocol.send_sabm()
+                await asyncio.wait_for(evnt.wait(), timeout=0.1)
+                print("SABM synced successfully.")
+                break
+            except asyncio.TimeoutError:
+                print("Timeout, retrying SABM.")
+                continue
 
     async def command(
         self, command: BaseCommand, program_id=0, task_id=1, max_retries=3, timeout=5

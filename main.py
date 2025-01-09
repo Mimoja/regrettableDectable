@@ -28,7 +28,7 @@ from APIParser import dectMode
 
 
 async def main():
-    port = "/dev/ttyUSB1"
+    port = "/dev/ttyUSB0"
     baudrate = 115200
 
     dct = DECT(port, baudrate)
@@ -129,50 +129,49 @@ async def main():
         sys.exit(1)
     print(colored("Base Station found!", "green"))
     print(baseStation.caps())
-
-    print(colored("Trying auto registration", "green"))
-
-    await dct.command(
-        ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
-        max_retries=1,
-        timeout=0,
-    )
-
-    baseStationName = await dct.wait_for(Commands.API_PP_MM_FP_NAME_IND, timeout=40)
-    if not baseStationName:
-        print(colored("Base Station not found!", "red"))
-        sys.exit(1)
-
-    print(colored("Base Station found!", "green"))
-    print(baseStationName)
+    print(colored("RFPI:", "green"), hex(bytes(baseStation.Rfpi)))
+    # print(colored("Trying auto registration", "green"))
 
     # await dct.command(
-    #     ApiPpMmRegistrationSelectedReq(
-    #         subscription_no=1,
-    #         ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
-    #         rfpi=baseStation.Rfpi,
-    #     ),
+    #     ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
     #     max_retries=1,
     #     timeout=0,
     # )
 
-    # status = await dct.wait_for(
-    #     [
-    #         Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
-    #         Commands.API_PP_MM_REGISTRATION_FAILED_IND,
-    #     ],
-    #     timeout=40,
-    # )
-    # if status:
-    #     if status.Primitive == Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
-    #         print(colored("Registration complete!", "green"))
-    #     else:
-    #         print(colored("Registration failed!", "red"))
-    #         print(status.Reason)
-    #         await dct.command(
-    #             ApiPpMmRegistrationAutoReq(0, bytes([0xFF, 0xFF, 0x00, 0x00])),
-    #             max_retries=1,
-    #         )
+    # baseStationName = await dct.wait_for(Commands.API_PP_MM_FP_NAME_IND, timeout=40)
+    # if not baseStationName:
+    #     print(colored("Base Station not found!", "red"))
+    # else:
+    #     print(colored("Base Station found!", "green"))
+    #     print(baseStationName)
+
+    await dct.command(
+        ApiPpMmRegistrationSelectedReq(
+            subscription_no=1,
+            ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
+            rfpi=baseStation.Rfpi,
+        ),
+        max_retries=1,
+        timeout=0,
+    )
+
+    status = await dct.wait_for(
+        [
+            Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
+            Commands.API_PP_MM_REGISTRATION_FAILED_IND,
+        ],
+        timeout=40,
+    )
+    if status:
+        if status.Primitive == Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
+            print(colored("Registration complete!", "green"))
+        else:
+            print(colored("Registration failed!", "red"))
+            print(status.Reason)
+            await dct.command(
+                ApiPpMmRegistrationAutoReq(0, bytes([0xFF, 0xFF, 0x00, 0x00])),
+                max_retries=1,
+            )
 
     await asyncio.Future()
 

@@ -15,9 +15,9 @@ class MailProtocol(asyncio.Protocol):
         self.max_outstanding = 7
         self.poll_timers: Dict[int, float] = {}  # Track PollFinal timers
         self.timer_duration = 1.0  # PollFinal timer duration in seconds
-        self.synced = False
         self.temp_buffer = b""
         self.onMessage = onMessage
+        self.wait_for_sabm = False
 
         # Mark/Reset additions
         self.mark_expiry: Dict[ApiComponent, float] = (
@@ -29,7 +29,6 @@ class MailProtocol(asyncio.Protocol):
     def connection_made(self, transport):
         self.transport = transport
         print("Connection established.")
-        self.send_sabm()
 
     def data_received(self, data):
         print(f"Data received: {hexdump(data)}")
@@ -37,10 +36,10 @@ class MailProtocol(asyncio.Protocol):
 
     def connection_lost(self, exc):
         print("Connection lost.")
-        self.synced = False
         asyncio.get_event_loop().stop()
 
     def send_sabm(self, pf=True):
+        self.wait_for_sabm = asyncio.Event()
         header = 0xC8 if pf else 0xC0
         frame = bytes([0x10, 0x00, 0x01, header, header])
         self.transport.write(frame)
@@ -48,6 +47,7 @@ class MailProtocol(asyncio.Protocol):
         self.outstanding_frames = {}
         self.rx_seq = 0
         self.tx_seq = 0
+        return self.wait_for_sabm
 
     def markReset(self, component: str):
         block_until = time.time() + 1.0
@@ -204,8 +204,12 @@ class MailProtocol(asyncio.Protocol):
                 su_id = (header >> 4) & 0x03
                 if unnumbered:
                     print(f"SABM frame received. SU_ID={su_id} pf={pf}")
-                    if not self.synced and su_id == 0x00 and pf:
+                    self.tx_seq = 0
+                    self.rx_seq = 0
+                    if pf:
                         self.send_sabm(pf=False)
+                    elif self.wait_for_sabm and not self.wait_for_sabm.is_set():
+                        self.wait_for_sabm.set()
                 else:
                     rx_seq = header & 0x07
                     if len(self.temp_buffer) < 5:

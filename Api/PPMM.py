@@ -15,6 +15,8 @@ from .Api import PPCommand
 from .Commands import Commands
 from enum import IntEnum
 
+from enum import IntEnum
+
 
 class ApiMmSearchModeType(IntEnum):
     API_MM_CONTINOUS_SEARCH = 0x00
@@ -126,9 +128,6 @@ class ApiPpMmRegistrationSelectedReq(PPCommand):
         self.SubscriptionNo = subscription_no
         self.AcCode = (c_uint8 * 4)(*ac_code)
         self.Rfpi = (c_uint8 * 5)(*rfpi)
-
-
-from enum import IntEnum
 
 
 class ApiPpMmRejectReasonType(IntEnum):
