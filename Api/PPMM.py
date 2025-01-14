@@ -43,8 +43,10 @@ class ApiPpMmFpNameInd(BaseCommand):
     def __init__(self, name: bytes):
         self.Primitive = Commands.API_PP_MM_FP_NAME_IND
         self.NameLength = len(name)
-        self.set_array(self.Name, (c_uint8 * self.Length)(*name.encode()))
+        self.set_array(self.Name, (c_uint8 * self.NameLength)(*name.encode()))
 
+    def __str__(self):
+        return self.to_bytes()[4:].decode()
 
 
 class ApiPpMmRegistrationSearchInd(BaseCommand):
@@ -87,7 +89,7 @@ class ApiPpMmRegistrationSearchInd(BaseCommand):
         fp_cap_bit_40_47: int,
     ):
         self.Primitive = Commands.API_PP_MM_REGISTRATION_SEARCH_IND
-        self.Rfpi = rfpi
+        self.Rfpi = (c_uint8 * 5)(*rfpi)
         self.FpCapBit24_31 = fp_cap_bit_24_31
         self.FpCapBit32_39 = fp_cap_bit_32_39
         self.FpCapBit40_47 = fp_cap_bit_40_47
@@ -112,7 +114,7 @@ class ApiPpMmRegistrationAutoReq(BaseCommand):
     _fields_ = [("SearchMode", c_uint8), ("AccessCode", c_uint8 * 4)]
 
     def __init__(self, search_mode: int, access_code: bytes):
-        self.Primitive = Commands.API_PP_MM_REGISTRATION_SEARCH_REQ
+        self.Primitive = Commands.API_PP_MM_REGISTRATION_AUTO_REQ
         self.SearchMode = search_mode
         self.AccessCode = (c_uint8 * 4)(*access_code)
 
@@ -131,7 +133,26 @@ class ApiPpMmRegistrationSelectedReq(BaseCommand):
         self.Rfpi = (c_uint8 * 5)(*rfpi)
 
 
-class ApiPpMmRejectReasonType(IntEnum):
+class ApiPpMmRegistrationCompleteInd(BaseCommand):
+    _fields_ = [
+        ("HandsetId", c_uint8),
+        ("KnownFp", c_uint8),
+        ("InfoElementLength", c_uint16),
+        ("InfoElement", c_uint8 * 1),
+    ]
+
+    def __init__(self, handsetId: int, KnownFp: bool, info: bytes):
+        self.Primitive = Commands.API_PP_MM_REGISTRATION_FAILED_IND
+        self.HandsetId = handsetId
+        self.KnownFp = KnownFp
+        self.InfoElementLength = len(info)
+        self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
+
+    def __str__(self):
+        return self.to_bytes()[4:].decode()
+
+
+class ApiPpMmRejectReason(IntEnum):
     API_MM_REJ_NO_REASON = 0x00
     API_MM_REJ_TPUI_UNKNOWN = 0x01
     API_MM_REJ_IPUI_UNKNOWN = 0x02
@@ -177,3 +198,73 @@ class ApiPpMmRegistrationFailedInd(BaseCommand):
     def __init__(self, reason: int):
         self.Primitive = Commands.API_PP_MM_REGISTRATION_FAILED_IND
         self.Reason = reason
+
+
+class ApiPpMmLockReq(BaseCommand):
+    _fields_ = [
+        ("SubscriptionNo", c_uint8),
+    ]
+
+    def __init__(self, subNumber=0):
+        self.Primitive = Commands.API_PP_MM_LOCK_REQ
+        self.SubscriptionNo = subNumber  # 0 = auto select
+
+
+class ApiPpMmLockedReq(BaseCommand):
+    def __init__(self):
+        self.Primitive = Commands.API_PP_MM_LOCKED_REQ
+
+
+class ApiPpMmLockedInd(BaseCommand):
+    _fields_ = [
+        ("SubscriptionNo", c_uint8),
+        ("FpCapBit24_31", c_uint8),
+        ("FpCapBit32_39", c_uint8),
+        ("FpCapBit40_47", c_uint8),
+        ("InfoElementLength", c_uint16),
+        ("InfoElement", c_uint8 * 1),  # Placeholder for variable-length field
+    ]
+
+    def __init__(
+        self,
+        subscription_no: int,
+        fp_cap_bit_24_31: int,
+        fp_cap_bit_32_39: int,
+        fp_cap_bit_40_47: int,
+        info_element: bytes,
+    ):
+        self.Primitive = Commands.API_PP_MM_LOCKED_IND
+        self.SubscriptionNo = subscription_no
+        self.FpCapBit24_31 = fp_cap_bit_24_31
+        self.FpCapBit32_39 = fp_cap_bit_32_39
+        self.FpCapBit40_47 = fp_cap_bit_40_47
+        self.InfoElementLength = len(info_element)
+        self.set_array(
+            self.InfoElement, (c_uint8 * self.InfoElementLength)(*info_element)
+        )
+
+    def caps(self):
+        caps = {
+            "Conference": bool(self.FpCapBit24_31 & 0x01),
+            "PermanentCLIR": bool(self.FpCapBit24_31 & 0x02),
+            "NG_DECT_extended_wideband_voice": bool(self.FpCapBit24_31 & 0x04),
+            "DPRS": (self.FpCapBit24_31 >> 3) & 0x0F,
+            "NG_DECT_wideband_voice": bool(self.FpCapBit24_31 & 0x80),
+            "No_emission": bool(self.FpCapBit32_39 & 0x10),
+            "Multiple_lines": bool(self.FpCapBit32_39 & 0x20),
+            "Call_deflection": bool(self.FpCapBit32_39 & 0x40),
+            "Call_intrusion": bool(self.FpCapBit32_39 & 0x80),
+            "Light_data_services": bool(self.FpCapBit40_47 & 0x04),
+            "Early_encryption": bool(self.FpCapBit40_47 & 0x20),
+        }
+        info = self.to_bytes()[8:]
+        return {
+            "caps": caps,
+            "sub_no": self.SubscriptionNo,
+            "info": info,
+        }
+
+
+class ApiPpMmUnlockedInd(BaseCommand):
+    def __init__(self):
+        self.Primitive = Commands.API_PP_MM_UNLOCKED_IND

@@ -17,6 +17,12 @@ from Api.PPMM import (
     ApiPpMmRegistrationSearchReq,
     ApiMmSearchModeType,
     ApiPpMmRegistrationSelectedReq,
+    ApiPpMmLockedReq,
+    ApiPpMmLockedInd,
+    ApiPpMmRejectReason,
+    ApiPpMmLockReq,
+    ApiPpMmUnlockedInd,
+    ApiPpMmRegistrationSearchInd,
 )
 from Api.Commands import PtCommand, Commands
 from Api.FPMM import ApiFpMmGetIdReq, ApiFpMmGetAccessCodeReq
@@ -34,8 +40,6 @@ async def main():
     dct = DECT(port, baudrate)
 
     await dct.connect()
-
-    await asyncio.sleep(1)
 
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
     pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2)
@@ -108,52 +112,71 @@ async def main():
             ],
         )
     )
+    # print(colored("Sending 'API_PP_MM_LOCK_REQ' request command...", "yellow"))
+    # await dct.command(ApiPpMmLockReq(), timeout=20, max_retries=1)
 
-    print(
-        colored(
-            "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...", "yellow"
-        )
+    print(colored("Sending 'API_PP_MM_LOCKED_REQ' request command...", "yellow"))
+    await dct.command(ApiPpMmLockedReq(), timeout=0, max_retries=1)
+    locked_resp = await dct.wait_for(
+        [
+            Commands.API_PP_MM_LOCKED_IND,
+            Commands.API_PP_MM_UNLOCKED_IND,
+        ],
+        timeout=30,
     )
-    await dct.command(
-        ApiPpMmRegistrationSearchReq(ApiMmSearchModeType.API_MM_CONTINOUS_SEARCH),
-        max_retries=1,
-        timeout=0,
-    )
-
-    baseStation = await dct.wait_for(
-        Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
-    )
-
-    if not baseStation:
-        print(colored("Base Station not found!", "red"))
+    if not locked_resp:
+        print(colored("PPMM locking status failed", "red"))
         sys.exit(1)
-    print(colored("Base Station found!", "green"))
-    print(baseStation.caps())
-    print(colored("RFPI:", "green"), hex(bytes(baseStation.Rfpi)))
-    # print(colored("Trying auto registration", "green"))
+    if type(locked_resp) is ApiPpMmLockedInd:
+        print(colored("PPMM is locked", "blue"))
+    else:
+        print(colored("PPMM is unlocked", "blue"))
 
-    # await dct.command(
-    #     ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
-    #     max_retries=1,
-    #     timeout=0,
-    # )
+    auto_registration = False
+    if auto_registration:
+        print(colored("Trying auto registration", "green"))
 
-    # baseStationName = await dct.wait_for(Commands.API_PP_MM_FP_NAME_IND, timeout=40)
-    # if not baseStationName:
-    #     print(colored("Base Station not found!", "red"))
-    # else:
-    #     print(colored("Base Station found!", "green"))
-    #     print(baseStationName)
+        await dct.command(
+            ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
+            max_retries=1,
+            timeout=0,
+        )
+    else:
+        print(colored("Trying manual registration", "yellow"))
+        print(
+            colored(
+                "Sending 'API_PP_MM_REGISTRATION_SEARCH_REQ' request command...",
+                "yellow",
+            )
+        )
+        await dct.command(
+            ApiPpMmRegistrationSearchReq(0),
+            max_retries=1,
+            timeout=0,
+        )
 
-    await dct.command(
-        ApiPpMmRegistrationSelectedReq(
-            subscription_no=1,
-            ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
-            rfpi=baseStation.Rfpi,
-        ),
-        max_retries=1,
-        timeout=0,
-    )
+        baseStation = await dct.wait_for(
+            Commands.API_PP_MM_REGISTRATION_SEARCH_IND, timeout=40
+        )
+
+        if not baseStation:
+            print(colored("Base Station not found!", "red"))
+            sys.exit(1)
+        print(colored("Base Station found!", "green"))
+        print(baseStation.caps())
+        rfpi = baseStation.Rfpi
+        print(colored("RFPI:", "yellow"), hexdump(bytes(rfpi), False))
+
+        print(colored("Connecting to base station", "yellow"))
+        await dct.command(
+            ApiPpMmRegistrationSelectedReq(
+                subscription_no=1,
+                ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
+                rfpi=rfpi,
+            ),
+            max_retries=1,
+            timeout=0,
+        )
 
     status = await dct.wait_for(
         [
@@ -162,15 +185,30 @@ async def main():
         ],
         timeout=40,
     )
-    if status:
+    if not status:
+        print(colored("Registration status not received!", "red"))
+    else:
+
         if status.Primitive == Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
             print(colored("Registration complete!", "green"))
-        else:
+        elif status.Primitive == Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             print(colored("Registration failed!", "red"))
-            print(status.Reason)
+            print(
+                colored("Reason: ", "red"),
+                colored(ApiPpMmRejectReason(status.Reason).name, "red"),
+            )
+        elif status.Primitive == Commands.API_PP_MM_REGISTRATION_SEARCH_IND:
+            print(colored("Found a base station after auto", "yellow"))
+            print(status.caps())
+
             await dct.command(
-                ApiPpMmRegistrationAutoReq(0, bytes([0xFF, 0xFF, 0x00, 0x00])),
+                ApiPpMmRegistrationSelectedReq(
+                    subscription_no=1,
+                    ac_code=bytes([0xFF, 0xFF, 0x00, 0x00]),
+                    rfpi=status.Rfpi,
+                ),
                 max_retries=1,
+                timeout=0,
             )
 
     await asyncio.Future()
