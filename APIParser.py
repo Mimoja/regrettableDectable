@@ -10,8 +10,12 @@ from Api.PPMM import (
     ApiPpMmFpNameInd,
     ApiPpMmRegistrationSearchInd,
     ApiPpMmRegistrationFailedInd,
-    ApiPpMmRejectReasonType,
+    ApiPpMmRejectReason,
+    ApiPpMmLockedInd,
+    ApiPpMmRegistrationCompleteInd,
+    ApiPpMmUnlockedInd,
 )
+from util import hexdump
 
 
 def dectMode(mode_id: int):
@@ -48,24 +52,19 @@ def dectMode(mode_id: int):
 
 def parseMail(primitive, params):
     payload = bytes([primitive & 0xFF, primitive >> 8, *params])
+    print(colored(f"{Commands(primitive).name} received", "blue"))
     match primitive:
         case Commands.API_FP_RESET_IND:
             print(
-                "API_FP_RESET_IND received:",
                 "Success" if params[0] == 0 else f"Error: {params[0]}",
             )
-
         case Commands.API_PP_GET_FW_VERSION_CFM:
-            print("API_PP_GET_FW_VERSION_CFM received.")
             return ApiPpGetFwVersionCfm.from_bytes(payload)
         case Commands.API_FP_GET_FW_VERSION_CFM:
-            print("API_FP_GET_FW_VERSION_CFM received.")
             return ApiFpGetFwVersionCfm.from_bytes(payload)
         case Commands.API_FP_MM_GET_ID_CFM:
-            print("API_FP_MM_GET_ID_CFM received.")
             print(f"ID: {params[1]:02x}{params[2]:02x}{params[3]:02x}{params[4]:02x}")
         case Commands.API_FP_MM_GET_ACCESS_CODE_CFM:
-            print("API_FP_MM_GET_ACCESS_CODE_CFM received.")
             access_code = (
                 f"{params[1]:02x}{params[2]:02x}{params[3]:02x}{params[4]:02x}"
             )
@@ -73,34 +72,29 @@ def parseMail(primitive, params):
             print(f"Access Code: {access_code}")
         case Commands.API_FP_MM_SET_REGISTRATION_MODE_CFM:
             print(
-                "API_FP_MM_SET_REGISTRATION_MODE_CFM received:",
                 "Success" if params[0] == 0 else f"Error: {params[0]}",
             )
         case Commands.API_FP_MM_REGISTRATION_COMPLETE_IND:
-            print("API_FP_MM_REGISTRATION_COMPLETE_IND received.")
             print("Registration complete!")
             print("Handset ID", params[1])
             # print(f"resp len {params[2]:02x} {params[3]:02x}")
             # length = int(params[2:3])
             # print("InfoElement", params[4 : 4 + length])
         case Commands.API_FP_MM_HANDSET_PRESENT_IND:
-            print("API_FP_MM_HANDSET_PRESENT_IND received.")
             print("New handset present!")
             print("Handset ID", params[0])
         case Commands.API_PP_MM_FP_NAME_IND:
-            print("API_PP_MM_FP_NAME_IND received.")
+            if len(params) == 1:
+                return ApiPpMmFpNameInd("")
             return ApiPpMmFpNameInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_SEARCH_IND:
-            print("API_PP_MM_REGISTRATION_SEARCH_IND received.")
-            return ApiPpMmRegistrationSearchInd.from_bytes(payload)
+            print(hexdump(payload))
+            ind = ApiPpMmRegistrationSearchInd.from_bytes(payload)
+            return ind
         case Commands.API_PROD_TEST_REQ:
-            print(
-                f"API_PROD_TEST_REQ received. OpCode: {params[1]:02x} {params[0]:02x}"
-            )
+            print(f"OpCode: {params[1]:02x} {params[0]:02x}")
         case Commands.API_PROD_TEST_CFM:
-            print(
-                f"API_PROD_TEST_CFM received. OpCode: {params[1]:02x} {params[0]:02x}"
-            )
+            print(f"OpCode: {params[1]:02x} {params[0]:02x}")
             cfm = ApiProdTestCfm.from_bytes(payload)
             print("Opcode", cfm.Opcode)
             print("Param Length=", cfm.ParameterLength)
@@ -108,34 +102,21 @@ def parseMail(primitive, params):
             return cfm
         case Commands.API_IMAGE_ACTIVATE_CFM:
             print(
-                "API_IMAGE_ACTIVATE_CFM received:",
                 "Success" if params[0] == 0 else f"Error: {params[0]}",
             )
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
-            print("API_PP_MM_REGISTRATION_FAILED_IND received.")
             return ApiPpMmRegistrationFailedInd.from_bytes(payload)
+        case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
+            return ApiPpMmRegistrationCompleteInd.from_bytes(payload)
         case Commands.API_HAL_LED_CFM:
-            print("API_HAL_LED_CFM  received.")
             print("LEDs toggled.")
         case Commands.API_IMAGE_ACTIVATE_CFM:
-            print("API_IMAGE_ACTIVATE_CFM received.")
             print(ApiImageActivateCfm.from_bytes(payload).Status)
-        case Commands.API_PP_CRADLE_DETECT_IND:
-            print("API_PP_CRADLE_DETECT_IND received.")
-        case Commands.API_HAL_DEVICE_CONTROL_CFM:
-            print("API_HAL_DEVICE_CONTROL_CFM received.")
-        case Commands.API_PP_RESET_IND:
-            print("API_PP_RESET_IND received.")
-        case Commands.API_FP_RESET_IND:
-            print("API_FP_RESET_IND received.")
-        case Commands.API_PP_BAT_NON_CHARGEABLE_IND:
-            print("API_PP_BAT_NON_CHARGEABLE_IND received.")
-        case Commands.API_PP_BAT_CAPACITY_IND:
-            print("API_PP_BAT_CAPACITY_IND received")
-        case Commands.API_PP_BAT_CHARGE_IND:
-            print("API_PP_BAT_CHARGE_IND received")
+        case Commands.API_PP_MM_LOCKED_IND:
+            return ApiPpMmLockedInd.from_bytes(payload)
+        case Commands.API_PP_MM_UNLOCKED_IND:
+            return ApiPpMmUnlockedInd.from_bytes(payload)
         case Commands.API_IMAGE_INFO_CFM:
-            print("API_IMAGE_INFO_CFM received")
             try:
                 cfm = ApiImageInfoCfm.from_bytes(payload)
                 print("Status", cfm.Status)
