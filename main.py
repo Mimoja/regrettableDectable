@@ -21,8 +21,10 @@ from Api.PPMM import (
     ApiPpMmLockedInd,
     ApiPpMmRejectReason,
     ApiPpMmLockReq,
+    ApiPpMmEasyPairingSearchReq,
     ApiPpMmUnlockedInd,
     ApiPpMmRegistrationSearchInd,
+    ApiPpMmRegistrationStopReq,
 )
 from Api.Commands import PtCommand, Commands
 from Api.FPMM import ApiFpMmGetIdReq, ApiFpMmGetAccessCodeReq
@@ -212,6 +214,9 @@ async def main():
         print(baseStation.caps())
         rfpi = baseStation.Rfpi
         print(colored("RFPI:", "yellow"), hexdump(bytes(rfpi), False))
+
+        print(colored("Requesting search stop", "yellow"))
+        await dct.command(ApiPpMmRegistrationStopReq(), max_retries=1, timeout=10)
 
         print(colored("Connecting to base station", "yellow"))
         await dct.command(

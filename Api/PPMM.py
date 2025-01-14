@@ -49,6 +49,12 @@ class ApiPpMmFpNameInd(BaseCommand):
         return self.to_bytes()[4:].decode()
 
 
+class ApiPpMmEasyPairingSearchReq(BaseCommand):
+
+    def __init__(self):
+        self.Primitive = Commands.API_PP_MM_EASY_PAIRING_SEARCH_REQ
+
+
 class ApiPpMmRegistrationSearchInd(BaseCommand):
     _fields_ = [
         ("Rfpi", c_uint8 * 5),
@@ -117,6 +123,12 @@ class ApiPpMmRegistrationAutoReq(BaseCommand):
         self.Primitive = Commands.API_PP_MM_REGISTRATION_AUTO_REQ
         self.SearchMode = search_mode
         self.AccessCode = (c_uint8 * 4)(*access_code)
+
+
+class ApiPpMmRegistrationStopReq(BaseCommand):
+
+    def __init__(self):
+        self.Primitive = Commands.API_PP_MM_REGISTRATION_STOP_REQ
 
 
 class ApiPpMmRegistrationSelectedReq(BaseCommand):
