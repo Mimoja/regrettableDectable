@@ -15,6 +15,7 @@ from Api.PPMM import (
     ApiPpMmRegistrationCompleteInd,
     ApiPpMmUnlockedInd,
 )
+from Api.Api import RsStatusType
 from util import hexdump
 
 
@@ -100,10 +101,6 @@ def parseMail(primitive, params):
             print("Param Length=", cfm.ParameterLength)
             print("Parameters=", cfm.getParameters())
             return cfm
-        case Commands.API_IMAGE_ACTIVATE_CFM:
-            print(
-                "Success" if params[0] == 0 else f"Error: {params[0]}",
-            )
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             return ApiPpMmRegistrationFailedInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
@@ -111,7 +108,12 @@ def parseMail(primitive, params):
         case Commands.API_HAL_LED_CFM:
             print("LEDs toggled.")
         case Commands.API_IMAGE_ACTIVATE_CFM:
-            print(ApiImageActivateCfm.from_bytes(payload).Status)
+            return ApiImageActivateCfm.from_bytes(payload)
+        case Commands.API_IMAGE_INFO_CFM:
+            if params[0] != RsStatusType.RSS_NOT_FOUND and len(params) > 2:
+                return ApiImageInfoCfm.from_bytes(payload)
+            else:
+                return ApiImageInfoCfm(params[0], params[1], 0, 0, b"", 0, b"")
         case Commands.API_PP_MM_LOCKED_IND:
             return ApiPpMmLockedInd.from_bytes(payload)
         case Commands.API_PP_MM_UNLOCKED_IND:

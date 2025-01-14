@@ -9,8 +9,8 @@ from Api.HAL import (
     HalAreaType,
 )
 from Api.FPGENERAL import ApiFpGetFwVersionReq
-from Api.PPGENERAL import ApiPpGetFwVersionReq
-from Api.IMAGE import ApiImageActivateReq, ApiImageInfoReq
+from Api.PPGENERAL import ApiPpGetFwVersionReq, ApiPpResetReq
+from Api.IMAGE import ApiImageActivateReq, ApiImageInfoReq, ApiImageInfoCfm
 from Api.PROD import ApiProdTestReq, DectMode
 from Api.PPMM import (
     ApiPpMmRegistrationAutoReq,
@@ -30,17 +30,11 @@ from util import hexdump
 from termcolor import colored
 from Dect import DECT
 import sys
+from Api.Api import RsStatusType
 from APIParser import dectMode
 
 
-async def main():
-    port = "/dev/ttyUSB0"
-    baudrate = 115200
-
-    dct = DECT(port, baudrate)
-
-    await dct.connect()
-
+async def ensure_pp_mode(dct: DECT):
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
     pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2)
 
@@ -56,15 +50,22 @@ async def main():
             print(
                 colored("Sending 'API_IMAGE_ACTIVATE_REQ' request command...", "yellow")
             )
-            await dct.command(ApiImageActivateReq(0x01, False))
+            await dct.command(ApiImageActivateReq(0x00, False))
             await asyncio.sleep(12)
         else:
             print(colored("DECT Chip is in unknown mode", "yellow"))
             sys.exit(1)
     else:
         print(colored("DECT Chip is in PP mode", "yellow"))
+        print(colored("PP Version:", "yellow"), pp_version)
 
-    print(colored("Sending API_PROD_TEST_REQ :: PT_CMD_GET_DECT_MODE", "yellow"))
+
+async def set_dect_mode(dct: DECT):
+    print(
+        colored(
+            "Requesting Dect mode (API_PROD_TEST_REQ :: PT_CMD_GET_DECT_MODE)", "yellow"
+        )
+    )
     prod = await dct.command(
         ApiProdTestReq(opcode=PtCommand.PT_CMD_GET_DECT_MODE, data=[0x00])
     )
@@ -91,30 +92,8 @@ async def main():
             print(colored("Failed to set DECT Mode to EU", "red"))
             sys.exit(1)
 
-    print(colored("Blinking the blue LED...", "blue"))
-    print(colored("Sending 'API_HAL_LED_REQ' request command...", "yellow"))
-    await dct.command(
-        ApiHalLedReqType(
-            led=2,
-            commands=[
-                ApiHalLedCmdType(
-                    command=ApiHalLedCmdIdType.ALI_LED_ON,
-                    duration=300,
-                ),
-                ApiHalLedCmdType(
-                    command=ApiHalLedCmdIdType.ALI_LED_OFF,
-                    duration=300,
-                ),
-                ApiHalLedCmdType(
-                    command=ApiHalLedCmdIdType.ALI_REPEAT_SEQUENCE,
-                    duration=10,
-                ),
-            ],
-        )
-    )
-    # print(colored("Sending 'API_PP_MM_LOCK_REQ' request command...", "yellow"))
-    # await dct.command(ApiPpMmLockReq(), timeout=20, max_retries=1)
 
+async def get_locked_status(dct: DECT):
     print(colored("Sending 'API_PP_MM_LOCKED_REQ' request command...", "yellow"))
     await dct.command(ApiPpMmLockedReq(), timeout=0, max_retries=1)
     locked_resp = await dct.wait_for(
@@ -132,6 +111,73 @@ async def main():
     else:
         print(colored("PPMM is unlocked", "blue"))
 
+
+async def list_images(dct: DECT):
+    i = 0
+    images = []
+    while True:
+        print(colored(f"Getting info for image = {i}", "yellow"))
+        image_info: ApiImageInfoCfm = await dct.command(ApiImageInfoReq(image=i))
+        if not image_info:
+            break
+
+        status = RsStatusType(image_info.Status)
+        if status == RsStatusType.RSS_NOT_FOUND or image_info.ImageIndex == 0xFF:
+            print(colored(f"Stopping Enumeration after {i} images", "yellow"))
+            break
+
+        if status == RsStatusType.RSS_NO_DATA:
+            print(colored(f"Skipping image {i} due to no data", "yellow"))
+            i += 1
+            continue
+
+        image = image_info.to_dict()
+        images.append(
+            {
+                "index": i,
+                "status": status.name,
+                "id": image.get("ImageId"),
+                "device_id": image.get("DeviceId"),
+                "link_date": image.get("LinkDate"),
+                "name": image.get("name"),
+                "label": image.get("label"),
+            }
+        )
+        i += 1
+
+    for image in images:
+        color = "green" if image["status"] == "RSS_SUCCESS" else "magenta"
+        print(colored(f"Image {image['index']}:", color))
+        print(colored(f"Status: {image['status']}", color))
+        print(colored(f"ID: {image['id']}", color))
+        print(colored(f"Device ID: {image['device_id']}", color))
+        print(colored(f"Link Date: {image['link_date']}", color))
+        print(colored(f"Name: {image['name']}", color))
+        print(colored(f"Label: {image['label']}", color))
+
+
+async def open_line(dct: DECT):
+    pass
+
+
+async def main():
+    port = "/dev/ttyUSB0"
+    baudrate = 115200
+
+    dct = DECT(port, baudrate)
+
+    await dct.connect()
+
+    # Uncomment to reset the DECT modules NV storage
+    # await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
+
+    await ensure_pp_mode(dct)
+    await set_dect_mode(dct)
+    await get_locked_status(dct)
+    await list_images(dct)
+
+    # print(colored("Trying easy pairing", "green"))
+    # await dct.command(ApiPpMmEasyPairingSearchReq(), max_retries=1, timeout=30)
     auto_registration = False
     if auto_registration:
         print(colored("Trying auto registration", "green"))

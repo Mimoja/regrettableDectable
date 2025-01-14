@@ -6,6 +6,7 @@ from ctypes import (
     sizeof,
 )
 import ctypes
+import datetime
 
 from enum import Enum, auto, IntEnum
 
@@ -82,8 +83,13 @@ class BaseCommand(Structure):
         ("Primitive", c_uint16),  # The opcode/primitive
     ]
 
+    _raw_ = None
+    _last_field_original_end = None
+
     def to_bytes(self) -> bytes:
         """Serializes the command to bytes."""
+        if self._raw_:
+            return self._raw_
         return bytes(self)
 
     def set_array(self, entry, data):
@@ -99,6 +105,8 @@ class BaseCommand(Structure):
             pass
         except IndexError:
             size = 0
+
+        self._last_field_original_end = ctypes.sizeof(self)
 
         ctypes.resize(self, ctypes.sizeof(self) + size * (len(data) - 1))
         ctypes.memmove(entry, data, ctypes.sizeof(data))
@@ -134,7 +142,58 @@ class BaseCommand(Structure):
         """Deserializes bytes into a command object."""
         if len(data) < sizeof(cls):
             raise ValueError(f"Data too short for {cls.__name__}")
-        return cls.from_buffer_copy(data)
+        cmd = cls.from_buffer_copy(data)
+        if len(data) > sizeof(cls):
+
+            cmd._last_field_original_end = ctypes.sizeof(cmd)
+            ctypes.resize(cmd, len(data))
+        cmd._raw_ = data
+        return cmd
 
     def primitive(self):
         return self.Primitive
+
+    def to_dict(self):
+        # This comes from the baseclass and is sometimes not included therefore
+        ret = {"Primitive": hex(self.Primitive)}
+        # In case the last field is oversized we need to include it manually
+        last_field_name = self._fields_[-1][0]
+
+        for name, _ in self._fields_:
+            val = getattr(self, name)
+            if isinstance(val, ctypes.Array):
+                ret[name] = list(val)
+                if name == last_field_name and self._last_field_original_end:
+                    ret[name] += self.to_bytes()[self._last_field_original_end :]
+            else:
+                ret[name] = val
+
+        return ret
+
+    def __str__(self):
+        formated = self.to_dict()
+        # convert integers to hex
+        for key, value in formated.items():
+            if isinstance(value, int):
+                formated[key] = hex(value)
+            if isinstance(value, list):
+                formated[key] = [hex(x) for x in value]
+
+        # stringify the dict
+        return str(formated)
+
+    @staticmethod
+    def parseDate(date: bytes | list) -> datetime:
+        if date is None:
+            return None
+
+        if isinstance(date, bytes):
+            date = list(date)
+
+        try:
+            return datetime.datetime.strptime(
+                f"{date[0]:x}/{date[1]:x}/{date[2]:x} {date[3]:x}:{date[4]:x}",
+                "%d/%m/%y %H:%M",
+            )
+        except ValueError:
+            return None

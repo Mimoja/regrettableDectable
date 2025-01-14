@@ -6,6 +6,7 @@ from ctypes import (
 from enum import IntEnum
 from .Commands import Commands
 from .Api import BaseCommand, RsStatusType
+import datetime
 
 
 class ApiImageID(IntEnum):
@@ -59,6 +60,17 @@ class ApiImageInfoCfm(BaseCommand):
         self.NameLength = name_length
         self.LabelLength = len(data)
         self.set_array(self.Data, (c_ubyte * len(data))(*data))
+
+    def to_dict(self):
+        rep = super().to_dict()
+        data = rep["Data"]
+        rep["LinkDate"] = BaseCommand.parseDate(self.LinkDate)
+        rep["name"] = bytes(data[: self.NameLength]).decode("utf-8", errors="ignore")
+        rep["label"] = bytes(
+            data[self.NameLength : self.NameLength + self.LabelLength]
+        ).decode("utf-8", errors="ignore")
+        del rep["Data"]
+        return rep
 
 
 class ApiImageActivateReq(BaseCommand):

@@ -34,7 +34,6 @@ class ApiPpGetFwVersionReq(BaseCommand):
 class ApiPpGetFwVersionCfm(BaseCommand):
 
     _fields_ = [
-        ("Status", c_uint8),
         ("VersionHex", c_uint32),
         ("LinkDate", c_uint8 * 5),
         ("DectType", c_uint8),  # Placeholder for ApiDectTypeType
