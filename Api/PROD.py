@@ -23,7 +23,7 @@ class ApiProdTestReq(BaseCommand):
     _pack_ = 1
     _fields_ = [
         ("Opcode", c_uint16),
-        ("ParameterLength", c_uint8),
+        ("ParameterLength", c_uint16),
         ("Parameters", c_uint8 * 1),
     ]
 
