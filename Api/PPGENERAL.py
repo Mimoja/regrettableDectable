@@ -1,4 +1,4 @@
-from .Api import PPCommand
+from .Api import BaseCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -8,13 +8,13 @@ from ctypes import c_uint8, c_uint16, c_uint32, Structure
 # -----------------------------------------------------------------------------
 
 
-class ApiPpResetReq(PPCommand):
+class ApiPpResetReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_PP_RESET_REQ
 
 
-class ApiPpResetInd(PPCommand):
+class ApiPpResetInd(BaseCommand):
 
     _fields_ = [
         ("Status", c_uint8),
@@ -25,13 +25,13 @@ class ApiPpResetInd(PPCommand):
         self.Status = status
 
 
-class ApiPpGetFwVersionReq(PPCommand):
+class ApiPpGetFwVersionReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_PP_GET_FW_VERSION_REQ
 
 
-class ApiPpGetFwVersionCfm(PPCommand):
+class ApiPpGetFwVersionCfm(BaseCommand):
 
     _fields_ = [
         ("Status", c_uint8),
@@ -62,7 +62,7 @@ class ApiPpGetFwVersionCfm(PPCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info_element))(*info_element))
 
 
-class ApiPpSetCradleStatusReq(PPCommand):
+class ApiPpSetCradleStatusReq(BaseCommand):
 
     _fields_ = [
         ("ApiCradleStatus", c_uint8),  # Placeholder for ApiCradleStatusType
@@ -73,7 +73,7 @@ class ApiPpSetCradleStatusReq(PPCommand):
         self.ApiCradleStatus = cradle_status
 
 
-class ApiPpCradleDetectReq(PPCommand):
+class ApiPpCradleDetectReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_PP_CRADLE_DETECT_REQ
@@ -121,7 +121,7 @@ class ApiTimeDateCodeType(Structure):
         self.TimeZone = time_zone
 
 
-class ApiPpSetTimeReq(PPCommand):
+class ApiPpSetTimeReq(BaseCommand):
 
     _fields_ = [
         ("Coding", c_uint8),  # Placeholder for ApiTimeDateCodingType
@@ -138,13 +138,13 @@ class ApiPpSetTimeReq(PPCommand):
         self.ApiTimeDateCode = time_date_code
 
 
-class ApiPpGetTimeReq(PPCommand):
+class ApiPpGetTimeReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_PP_GET_TIME_REQ
 
 
-class ApiPpSyncTimeReq(PPCommand):
+class ApiPpSyncTimeReq(BaseCommand):
 
     _fields_ = [
         ("TerminalId", c_uint16),

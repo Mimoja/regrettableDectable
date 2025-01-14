@@ -74,13 +74,6 @@ class RsStatusType(IntEnum):
     RSS_MAX = 0xFF  # Maximum value.
 
 
-class ApiComponent(Enum):
-    SYSTEM = auto()
-    PP = auto()
-    FP = auto()
-    UNKNOWN = auto()
-
-
 class BaseCommand(Structure):
     """Base class for all commands."""
 
@@ -104,11 +97,11 @@ class BaseCommand(Structure):
             pass
         except ValueError:
             pass
+        except IndexError:
+            size = 0
+
         ctypes.resize(self, ctypes.sizeof(self) + size * (len(data) - 1))
         ctypes.memmove(entry, data, ctypes.sizeof(data))
-
-    def get_component(self):
-        return ApiComponent.SYSTEM
 
     @staticmethod
     def _set_size(entry, new_size):
@@ -141,17 +134,7 @@ class BaseCommand(Structure):
         """Deserializes bytes into a command object."""
         if len(data) < sizeof(cls):
             raise ValueError(f"Data too short for {cls.__name__}")
-        return cast(data, POINTER(cls)).contents
+        return cls.from_buffer_copy(data)
 
     def primitive(self):
         return self.Primitive
-
-
-class FPCommand(BaseCommand):
-    def get_component(self):
-        return ApiComponent.FP
-
-
-class PPCommand(BaseCommand):
-    def get_component(self):
-        return ApiComponent.PP

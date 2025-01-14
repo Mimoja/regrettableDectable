@@ -2,7 +2,7 @@ from enum import IntEnum
 from ctypes import (
     c_uint8,
 )
-from .Api import FPCommand
+from .Api import BaseCommand
 from .Commands import Commands
 
 # -----------------------------------------------------------------------------
@@ -54,13 +54,13 @@ class ApiMmRegistrationModeType(IntEnum):
 # -----------------------------------------------------------------------------
 
 
-class ApiFpMmGetIdReq(FPCommand):
+class ApiFpMmGetIdReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_MM_GET_ID_REQ
 
 
-class ApiFpMmGetIdCfm(FPCommand):
+class ApiFpMmGetIdCfm(BaseCommand):
     _fields_ = [("Status", c_uint8), ("Id", c_uint8 * 5)]
 
     def __init__(self, status: int, id_bytes: bytes):
@@ -71,12 +71,12 @@ class ApiFpMmGetIdCfm(FPCommand):
         self.Id = (c_uint8 * 5)(*id_bytes)
 
 
-class ApiFpMmGetAccessCodeReq(FPCommand):
+class ApiFpMmGetAccessCodeReq(BaseCommand):
     def __init__(self):
         self.Primitive = Commands.API_FP_MM_GET_ACCESS_CODE_REQ
 
 
-class ApiFpMmSetAccessCodeReq(FPCommand):
+class ApiFpMmSetAccessCodeReq(BaseCommand):
     _fields_ = [
         ("Ac", c_uint8 * 4),
     ]
@@ -88,7 +88,7 @@ class ApiFpMmSetAccessCodeReq(FPCommand):
         self.Ac = (c_uint8 * 4)(*access_code)
 
 
-class ApiFpMmGetAccessCodeCfm(FPCommand):
+class ApiFpMmGetAccessCodeCfm(BaseCommand):
     _fields_ = [("Status", c_uint8), ("Ac", c_uint8 * 4)]
 
     def __init__(self, status: int, access_code: bytes):
@@ -99,7 +99,7 @@ class ApiFpMmGetAccessCodeCfm(FPCommand):
         self.Ac = (c_uint8 * 4)(*access_code)
 
 
-class ApiFpMmSetNameReq(FPCommand):
+class ApiFpMmSetNameReq(BaseCommand):
     _fields_ = [
         ("Length", c_uint8),
         ("Data", c_uint8 * 1),  # Placeholder for dynamic field
@@ -111,7 +111,7 @@ class ApiFpMmSetNameReq(FPCommand):
         self.set_array(self.Data, (c_uint8 * self.Length)(*name.encode()))
 
 
-class ApiFpMmGetNameCfm(FPCommand):
+class ApiFpMmGetNameCfm(BaseCommand):
     _fields_ = [
         ("Status", c_uint8),
         ("Max", c_uint8),
@@ -127,7 +127,7 @@ class ApiFpMmGetNameCfm(FPCommand):
         self.set_array(self.Data, (c_uint8 * self.Length)(*name.encode()))
 
 
-class ApiFpMmGetAccessCodeCfm(FPCommand):
+class ApiFpMmGetAccessCodeCfm(BaseCommand):
     _fields_ = [("Status", c_uint8), ("Ac", c_uint8 * 4)]
 
     def __init__(self, status: int, access_code: bytes):

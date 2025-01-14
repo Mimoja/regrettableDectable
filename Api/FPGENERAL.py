@@ -1,4 +1,4 @@
-from .Api import FPCommand
+from .Api import BaseCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -8,13 +8,13 @@ from ctypes import c_uint8, c_uint16, c_uint32, Structure
 # -----------------------------------------------------------------------------
 
 
-class ApiFpResetReq(FPCommand):
+class ApiFpResetReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_RESET_REQ
 
 
-class ApiFpResetInd(FPCommand):
+class ApiFpResetInd(BaseCommand):
 
     _fields_ = [
         ("Status", c_uint8),
@@ -25,13 +25,13 @@ class ApiFpResetInd(FPCommand):
         self.Status = status
 
 
-class ApiFpGetFwVersionReq(FPCommand):
+class ApiFpGetFwVersionReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_GET_FW_VERSION_REQ
 
 
-class ApiFpGetFwVersionCfm(FPCommand):
+class ApiFpGetFwVersionCfm(BaseCommand):
 
     _fields_ = [
         ("Status", c_uint8),
@@ -59,7 +59,7 @@ class ApiFpGetFwVersionCfm(FPCommand):
         self.InfoElement = (c_uint8 * len(info_element))(*info_element)
 
 
-class ApiFpSetCradleStatusReq(FPCommand):
+class ApiFpSetCradleStatusReq(BaseCommand):
 
     _fields_ = [
         ("ApiCradleStatus", c_uint8),  # Placeholder for ApiCradleStatusType
@@ -70,7 +70,7 @@ class ApiFpSetCradleStatusReq(FPCommand):
         self.ApiCradleStatus = cradle_status
 
 
-class ApiFpCradleDetectReq(FPCommand):
+class ApiFpCradleDetectReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_CRADLE_DETECT_REQ
@@ -118,7 +118,7 @@ class ApiTimeDateCodeType(Structure):
         self.TimeZone = time_zone
 
 
-class ApiFpSetTimeReq(FPCommand):
+class ApiFpSetTimeReq(BaseCommand):
 
     _fields_ = [
         ("Coding", c_uint8),  # Placeholder for ApiTimeDateCodingType
@@ -135,13 +135,13 @@ class ApiFpSetTimeReq(FPCommand):
         self.ApiTimeDateCode = time_date_code
 
 
-class ApiFpGetTimeReq(FPCommand):
+class ApiFpGetTimeReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_GET_TIME_REQ
 
 
-class ApiFpSyncTimeReq(FPCommand):
+class ApiFpSyncTimeReq(BaseCommand):
 
     _fields_ = [
         ("TerminalId", c_uint16),
@@ -152,7 +152,7 @@ class ApiFpSyncTimeReq(FPCommand):
         self.TerminalId = terminal_id
 
 
-class ApiFpSetFeaturesReq(FPCommand):
+class ApiFpSetFeaturesReq(BaseCommand):
     _fields_ = [
         ("ApiFpFeature", c_uint8),
     ]
@@ -162,13 +162,13 @@ class ApiFpSetFeaturesReq(FPCommand):
         self.ApiFpFeature = features
 
 
-class ApiFpGetFeaturesReq(FPCommand):
+class ApiFpGetFeaturesReq(BaseCommand):
 
     def __init__(self):
         self.Primitive = Commands.API_FP_GET_FEATURES_REQ
 
 
-class ApiFpGetFeaturesCfm(FPCommand):
+class ApiFpGetFeaturesCfm(BaseCommand):
     _fields_ = [
         ("CurrentFeatures", c_uint8),
         ("AvailableFeatures", c_uint8),

@@ -3,7 +3,7 @@ import time
 from typing import Dict, List, Tuple
 from util import hexdump, is_mod8_less
 from APIParser import parseMail
-from Api.Api import BaseCommand, ApiComponent
+from Api.Api import BaseCommand
 
 
 class MailProtocol(asyncio.Protocol):
@@ -18,13 +18,7 @@ class MailProtocol(asyncio.Protocol):
         self.temp_buffer = b""
         self.onMessage = onMessage
         self.wait_for_sabm = False
-
-        # Mark/Reset additions
-        self.mark_expiry: Dict[ApiComponent, float] = (
-            {}
-        )  # timestamp when a component is unblocked
-
-        self.message_queue: List[Tuple[ApiComponent, bytes, bool]] = []
+        self.message_queue: List[Tuple[bytes, bool]] = []
 
     def connection_made(self, transport):
         self.transport = transport
@@ -49,13 +43,6 @@ class MailProtocol(asyncio.Protocol):
         self.tx_seq = 0
         return self.wait_for_sabm
 
-    def markReset(self, component: str):
-        block_until = time.time() + 1.0
-        self.mark_expiry[component] = block_until
-        print(
-            f"[MARK RESET] Component '{component}' is blocked until {block_until:.3f}."
-        )
-
     def flush_message_queue(self):
         if not self.message_queue:
             return
@@ -63,43 +50,29 @@ class MailProtocol(asyncio.Protocol):
         sendable = []
         remaining = []
 
-        for component, payload, pf in self.message_queue:
-            block_until = self.mark_expiry.get(component, 0)
+        for payload, pf in self.message_queue:
+            block_until = self.mark_expiry.get(0)
             if (
                 now >= block_until
                 and len(self.outstanding_frames) < self.max_outstanding
             ):
-                sendable.append((component, payload, pf))
+                sendable.append((payload, pf))
             else:
-                remaining.append((component, payload, pf))
+                remaining.append((payload, pf))
 
         self.message_queue = remaining
 
-        for component, payload, pf in sendable:
-            self._actually_send_information_frame(payload, pf, component)
+        for payload, pf in sendable:
+            self._actually_send_information_frame(payload, pf)
 
-    def send_information_frame(
-        self, payload: bytes, pf=True, component: ApiComponent = ApiComponent.UNKNOWN
-    ):
-        if time.time() < self.mark_expiry.get(component, 0):
+    def send_information_frame(self, payload: bytes, pf=True):
+        if len(self.outstanding_frames) >= self.max_outstanding:
             print(
-                f"Queuing message for component='{component}' "
-                f"because it's blocked by markReset. Payload={hexdump(payload, False)}"
-            )
-            self.message_queue.append((component, payload, pf))
-        elif time.time() < self.mark_expiry.get(ApiComponent.SYSTEM, 0):
-            print(
-                f"Queuing message for component='{component}' "
-                f"as the entire chip is resetting. Payload={hexdump(payload, False)}"
-            )
-            self.message_queue.append((component, payload, pf))
-        elif len(self.outstanding_frames) >= self.max_outstanding:
-            print(
-                f"Queueing message for component='{component}' "
+                f"Queueing message"
                 f"because we have {len(self.outstanding_frames)} frames in flight "
                 f"(max {self.max_outstanding}). Payload={hexdump(payload, False)}"
             )
-            self.message_queue.append((component, payload, pf))
+            self.message_queue.append((payload, pf))
             return
         else:
             self._actually_send_information_frame(payload, pf)
@@ -129,10 +102,9 @@ class MailProtocol(asyncio.Protocol):
     def send(self, command: BaseCommand, program_id=0, task_id=1):
         command_bytes = command.to_bytes()
         payload = bytes([program_id, task_id, *command_bytes])
-        component = command.get_component()
-        self.send_information_frame(payload, pf=True, component=component)
+        self.send_information_frame(payload, pf=True)
         print(
-            f"Command sent: Program ID={program_id}, Task ID={task_id},  component='{component}', "
+            f"Command sent: Program ID={program_id}, Task ID={task_id}', "
             f"Payload={hexdump(payload, False)}"
         )
 
@@ -142,16 +114,14 @@ class MailProtocol(asyncio.Protocol):
         task_id: int,
         primitive: int,
         params: bytes,
-        component: str = "system",
     ):
         primitive_high = (primitive >> 8) & 0xFF
         primitive_low = primitive & 0xFF
         payload = bytes([program_id, task_id, primitive_low, primitive_high, *params])
-        self.send_information_frame(payload, pf=True, component=component)
+        self.send_information_frame(payload, pf=True)
         print(
             f"Command sent: Program ID={program_id}, Task ID={task_id}, "
             f"Primitive=0x{primitive:02x}, Params={hexdump(params, False)}, "
-            f"component='{component}'"
         )
 
     def handle_frame(self, data):

@@ -81,15 +81,23 @@ class DECT:
                 )
             )
 
-        if primitive in self.pending_requests or primitive - 1 in self.pending_requests:
-            if primitive - 1 in self.pending_requests:
-                primitive = primitive - 1
+        if (
+            primitive not in self.pending_requests
+            and primitive - 1 in self.pending_requests
+        ):
+            primitive = primitive - 1
 
-            print(f"[DECT] Matched response: {response} (Primitive={hex(primitive)})")
+        if primitive in self.pending_requests:
+
+            print(
+                f"[DECT] Matched response: {response} (Primitive={Commands(primitive).name})"
+            )
             self.pending_requests[primitive]["response"] = response
             self.pending_requests[primitive]["event"].set()
         else:
-            print(f"[DECT] Unmatched response: {response} (Primitive={hex(primitive)})")
+            print(
+                f"[DECT] Unmatched response: {response} (Primitive={Commands(primitive).name})"
+            )
 
     async def wait_for(self, primitive, timeout=1):
 

@@ -11,7 +11,7 @@ from ctypes import (
     POINTER,
 )
 from typing import Optional, Type
-from .Api import PPCommand
+from .Api import BaseCommand
 from .Commands import Commands
 from enum import IntEnum
 
@@ -23,7 +23,7 @@ class ApiMmSearchModeType(IntEnum):
     API_MM_SINGLE_SEARCH = 0x01
 
 
-class ApiPpMmRegistrationSearchReq(PPCommand):
+class ApiPpMmRegistrationSearchReq(BaseCommand):
     _fields_ = [("SearchMode", c_uint8)]
 
     def __init__(self, search_mode: ApiMmSearchModeType):
@@ -34,7 +34,7 @@ class ApiPpMmRegistrationSearchReq(PPCommand):
             self.SearchMode = search_mode.value
 
 
-class ApiPpMmFpNameInd(PPCommand):
+class ApiPpMmFpNameInd(BaseCommand):
     _fields_ = [
         ("NameLength", c_uint16),
         ("Name", c_uint8 * 1),  # Placeholder for variable-length field
@@ -46,7 +46,8 @@ class ApiPpMmFpNameInd(PPCommand):
         self.set_array(self.Name, (c_uint8 * self.Length)(*name.encode()))
 
 
-class ApiPpMmRegistrationSearchInd(PPCommand):
+
+class ApiPpMmRegistrationSearchInd(BaseCommand):
     _fields_ = [
         ("Rfpi", c_uint8 * 5),
         ("FpCapBit24_31", c_uint8),
@@ -107,7 +108,7 @@ class ApiPpMmRegistrationSearchInd(PPCommand):
         }
 
 
-class ApiPpMmRegistrationAutoReq(PPCommand):
+class ApiPpMmRegistrationAutoReq(BaseCommand):
     _fields_ = [("SearchMode", c_uint8), ("AccessCode", c_uint8 * 4)]
 
     def __init__(self, search_mode: int, access_code: bytes):
@@ -116,7 +117,7 @@ class ApiPpMmRegistrationAutoReq(PPCommand):
         self.AccessCode = (c_uint8 * 4)(*access_code)
 
 
-class ApiPpMmRegistrationSelectedReq(PPCommand):
+class ApiPpMmRegistrationSelectedReq(BaseCommand):
     _fields_ = [
         ("SubscriptionNo", c_uint8),
         ("AcCode", c_uint8 * 4),
@@ -168,7 +169,7 @@ class ApiPpMmRejectReasonType(IntEnum):
     API_MM_REJ_MM_TRANSACTION_ONGOING = 0x92
 
 
-class ApiPpMmRegistrationFailedInd(PPCommand):
+class ApiPpMmRegistrationFailedInd(BaseCommand):
     _fields_ = [
         ("Reason", c_uint8),
     ]
