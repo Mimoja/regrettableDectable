@@ -122,7 +122,6 @@ async def set_dect_mode(dct: DECT):
     )
     dect_mode = prod.getParameters()[0]
 
-    print(colored(f"DECT Mode: {dectMode(dect_mode)} {hex(dect_mode)}", "yellow"))
     if dect_mode == 0xFF:
         print(colored("DECT Mode is 0xFF, resetting NVS first...", "red"))
         await reset_nv_storage(dct)
@@ -136,7 +135,7 @@ async def set_dect_mode(dct: DECT):
         print(colored("DECT Mode is not EU, Setting now...", "yellow"))
         print(colored("Sending API_HAL_WRITE_REQ to write NVS", "yellow"))
         await dct.command(
-            ApiHalWriteReq(HalAreaType.AHA_NVS, 0x05, bytes([0x25])),
+            ApiHalWriteReq(ApiHalAreaType.AHA_NVS, 0x05, bytes([0x25])),
         )
         print(colored("Sending API_PROD_TEST_REQ :: PT_CMD_SET_DECT_MODE", "yellow"))
         await dct.command(
@@ -154,8 +153,11 @@ async def set_dect_mode(dct: DECT):
 
 
 async def lock(dct: DECT, request_lock=False):
-    print(colored("Sending / Requesting Lock command...", "yellow"))
-    cmd = ApiPpMmLockReq() if request_lock else ApiPpMmLockedReq()
+    if request_lock:
+        print(colored("Requesting Lock...", "yellow"))
+    else:
+        print(colored("Querrying Lock...", "yellow"))
+    cmd = ApiPpMmLockReq(0) if request_lock else ApiPpMmLockedReq()
     await dct.command(cmd, timeout=0, max_retries=1)
     locked_resp = await dct.wait_for(
         [
@@ -266,7 +268,7 @@ async def auto_register(dct: DECT):
         if not status:
             print(
                 colored(
-                    f"Registration status not yet received after {total_time}", "red"
+                    f"Registration status not yet received after {total_time}s", "red"
                 )
             )
         else:
@@ -316,16 +318,25 @@ async def manual_register(dct: DECT):
         max_retries=1,
         timeout=0,
     )
-    status = await dct.wait_for(
-        [
-            Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
-            Commands.API_PP_MM_REGISTRATION_FAILED_IND,
-        ],
-        timeout=40,
-    )
-    if not status:
-        print(colored("Registration status not received!", "red"))
-        sys.exit(1)
+    total_time = 0
+    while True:
+        timeout = 5
+        status = await dct.wait_for(
+            [
+                Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
+                Commands.API_PP_MM_REGISTRATION_FAILED_IND,
+            ],
+            timeout=timeout,
+        )
+        total_time += timeout
+        if not status:
+            print(
+                colored(
+                    f"Registration status not yet received after {total_time}s", "red"
+                )
+            )
+        else:
+            break
 
     if status.Primitive == Commands.API_PP_MM_REGISTRATION_FAILED_IND:
         print(colored("Registration failed!", "red"))
@@ -371,6 +382,33 @@ def parse_call(call_resp):
     return codectsIE, call
 
 
+async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
+    read_answer: ApiHalReadCfm = await dct.command(
+        ApiHalReadReq(ApiHalAreaType.AHA_NVS, target.offset, target.length),
+    )
+    if read_answer.Status != RsStatusType.RSS_SUCCESS:
+        return None
+    data = read_answer.to_dict().get("Data")
+    target.from_bytes(bytes(data))
+    return target
+
+
+async def known_fps(dct: DECT):
+
+    for target in [
+        EepromDef.EepromNotInRam.Subs0,
+        EepromDef.EepromNotInRam.Subs1,
+        EepromDef.EepromNotInRam.Subs2,
+        EepromDef.EepromNotInRam.Subs3,
+    ]:
+        sub = await read_eeprom(dct, target)
+        if sub is None:
+            continue
+        if sub.RFPI.values != [0xFF, 0xFF, 0xFF, 0xFF, 0xFF]:
+            return True
+    return False
+
+
 async def main():
     logging.getLogger("DECT").setLevel(logging.INFO)
     logging.getLogger("MailProtocol").setLevel(logging.WARNING)
@@ -392,8 +430,6 @@ async def main():
     await set_dect_mode(dct)
     await list_images(dct)
     locked = await lock(dct, request_lock=False)
-    if not locked:
-        locked = await lock(dct, request_lock=True)
 
     if locked is None:
         print(
@@ -405,6 +441,19 @@ async def main():
         await reset_pp()
         sys.exit(1)
 
+    if not locked:
+        can_lock = await known_fps(dct)
+        if can_lock:
+            print(colored("Found a known FP", "green"))
+            locked = await lock(dct, request_lock=True)
+        else:
+            print(
+                colored(
+                    "No known FP found. Registration is the only way from here on",
+                    "red",
+                )
+            )
+    # Still not locked?
     if not locked:
         # status = await manual_register(dct)
         status = await auto_register(dct)
