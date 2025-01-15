@@ -24,7 +24,7 @@ from Api.FPMM import ApiFpMmGetAccessCodeReq, ApiFpMmGetIdReq
 from Api.HAL import (
     ApiHalLedCmdIdType,
     ApiHalLedCmdType,
-    ApiHalLedReqType,
+    ApiHalLedReq,
     ApiHalWriteReq,
     ApiHalAreaType,
     ApiHalReadReq,
@@ -225,7 +225,7 @@ async def list_images(dct: DECT):
 async def blink_led(dct: DECT, led: int):
     print(colored(f"Blinking the LED {led}...", "blue"))
     await dct.command(
-        ApiHalLedReqType(
+        ApiHalLedReq(
             led=led,
             commands=[
                 ApiHalLedCmdType(
@@ -348,25 +348,15 @@ async def manual_register(dct: DECT):
     return status
 
 
-def parse_call(call_resp: ApiCcSetupInd):
-    call = call_resp.to_dict()
+def parse_call(call: ApiCcSetupInd):
     print(colored("We are beeing called:", "yellow"))
-    print(colored("Connection (E)ID:", "yellow"), call.get("ConEi"))
-    print(
-        colored("Call Class:", "yellow"),
-        ApiCcCallClassType(call.get("CallClass")).name,
-    )
-    print(
-        colored("Basic Service:", "yellow"),
-        ApiCcBasicServiceType(call.get("BasicService")).name,
-    )
-    print(
-        colored("Call Class:", "yellow"),
-        ApiCcCallClassType(call.get("CallClass")).name,
-    )
-    print(colored("Signal:", "yellow"), ApiCcSignalType(call.get("Signal")).name)
+    print(colored("Connection (E)ID:", "yellow"), call.ConEi)
+    print(colored("Call Class:", "yellow"), ApiCcCallClassType(call.CallClass).name)
+    print(colored("Service:", "yellow"), ApiCcBasicServiceType(call.BasicService).name)
+    print(colored("Call Class:", "yellow"), ApiCcCallClassType(call.CallClass).name)
+    print(colored("Signal:", "yellow"), ApiCcSignalType(call.Signal).name)
 
-    infoElements = call_resp.infoElements()
+    infoElements = call.infoElements()
     codectsIE: InfoElement = None
     for ie in infoElements:
         match ie.type:
@@ -422,10 +412,6 @@ async def main():
 
     # Uncomment to reset the DECT modules NV storage
     # await reset_nv_storage(dct)
-    await blink_led(dct, 2)
-    await asyncio.sleep(0.250)
-    await blink_led(dct, 3)
-
     await ensure_pp_mode(dct)
     await set_dect_mode(dct)
     await list_images(dct)
@@ -462,6 +448,10 @@ async def main():
         print(colored("Status", "yellow"), status)
 
     print(colored("Waiting for incoming call...", "yellow"))
+    await blink_led(dct, 2)
+    await asyncio.sleep(0.250)
+    await blink_led(dct, 3)
+
     while True:
         call_resp: ApiCcSetupInd = await dct.wait_for(
             [

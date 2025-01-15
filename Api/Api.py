@@ -210,10 +210,20 @@ class VariableSizeCommand(BaseCommand):
             return []
 
         val = getattr(self, last_field_name)
-        val = list(val)
+        val_size = ctypes.sizeof(val)
+        val_class = val[0].__class__
+        vals = list(val)
         if self._last_field_original_end:
-            val += self.to_bytes()[self._last_field_original_end :]
-        return val
+            data_left = self.to_bytes()[self._last_field_original_end :]
+            while len(data_left) > 0:
+                new_val = val_class.from_buffer_copy(data_left)
+                vals.append(new_val)
+                data_left = data_left[val_size:]
+
+        return vals
+
+    def data_bytes(self):
+        return b"".join([bytes(x) for x in self.data()])
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "VariableSizeCommand":

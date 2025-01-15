@@ -134,7 +134,7 @@ class ApiHalDeviceControlCfmType(BaseCommand):
         self.Control = control
 
 
-class ApiHalLedReqType(BaseCommand):
+class ApiHalLedReq(VariableSizeCommand):
     _pack_ = 1
     _fields_ = [
         ("LedNr", c_uint8),
@@ -149,7 +149,7 @@ class ApiHalLedReqType(BaseCommand):
         self.set_array(self.Commands, (ApiHalLedCmdType * len(commands))(*commands))
 
 
-class ApiHalLedCfmType(BaseCommand):
+class ApiHalLedCfm(BaseCommand):
     _fields_ = [
         ("Status", c_uint8),
     ]

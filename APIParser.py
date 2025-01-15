@@ -23,7 +23,7 @@ from Api.CC import (
     ApiCcConnectCfm,
     ApiCcRejectInd,
 )
-from Api.HAL import ApiHalReadCfm
+from Api.HAL import ApiHalReadCfm, ApiHalLedCfm
 from Api.Api import RsStatusType
 from util import hexdump
 
@@ -117,7 +117,7 @@ def parseMail(primitive, params):
         case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
             return ApiPpMmRegistrationCompleteInd.from_bytes(payload)
         case Commands.API_HAL_LED_CFM:
-            print("LEDs toggled.")
+            return ApiHalLedCfm.from_bytes(payload)
         case Commands.API_HAL_READ_CFM:
             return ApiHalReadCfm.from_bytes(payload)
         case Commands.API_IMAGE_ACTIVATE_CFM:
