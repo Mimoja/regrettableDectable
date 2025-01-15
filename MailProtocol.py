@@ -4,6 +4,10 @@ from typing import Dict, List, Tuple
 from util import hexdump, is_mod8_less
 from APIParser import parseMail
 from Api.Api import BaseCommand
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("MailProtocol")
 
 
 class MailProtocol(asyncio.Protocol):
@@ -22,14 +26,14 @@ class MailProtocol(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.transport = transport
-        print("Connection established.")
+        logger.info("Connection established.")
 
     def data_received(self, data):
-        print(f"Data received: {hexdump(data)}")
+        logger.debug(f"Data received: {hexdump(data)}")
         self.handle_frame(data)
 
     def connection_lost(self, exc):
-        print("Connection lost.")
+        logger.info("Connection lost.")
         asyncio.get_event_loop().stop()
 
     def send_sabm(self, pf=True):
@@ -37,7 +41,7 @@ class MailProtocol(asyncio.Protocol):
         header = 0xC8 if pf else 0xC0
         frame = bytes([0x10, 0x00, 0x01, header, header])
         self.transport.write(frame)
-        print(f"SABM frame sent: {hexdump(frame, False)}")
+        logger.debug(f"SABM frame sent: {hexdump(frame, False)}")
         self.outstanding_frames = {}
         self.rx_seq = 0
         self.tx_seq = 0
@@ -67,7 +71,7 @@ class MailProtocol(asyncio.Protocol):
 
     def send_information_frame(self, payload: bytes, pf=True):
         if len(self.outstanding_frames) >= self.max_outstanding:
-            print(
+            logger.info(
                 f"Queueing message"
                 f"because we have {len(self.outstanding_frames)} frames in flight "
                 f"(max {self.max_outstanding}). Payload={hexdump(payload, False)}"
@@ -88,7 +92,7 @@ class MailProtocol(asyncio.Protocol):
         self.outstanding_frames[self.tx_seq] = frame
         self.tx_seq = (self.tx_seq + 1) % 8
         self.transport.write(frame)
-        print(
+        logger.debug(
             f"Information frame sent TxSeq={tx_seq}, self.TxSeq={self.tx_seq}:\n{hexdump(frame, True)}"
         )
 
@@ -103,7 +107,7 @@ class MailProtocol(asyncio.Protocol):
         command_bytes = command.to_bytes()
         payload = bytes([program_id, task_id, *command_bytes])
         self.send_information_frame(payload, pf=True)
-        print(
+        logger.debug(
             f"Command sent: Program ID={program_id}, Task ID={task_id}', "
             f"Payload={hexdump(payload, False)}"
         )
@@ -119,7 +123,7 @@ class MailProtocol(asyncio.Protocol):
         primitive_low = primitive & 0xFF
         payload = bytes([program_id, task_id, primitive_low, primitive_high, *params])
         self.send_information_frame(payload, pf=True)
-        print(
+        logger.info(
             f"Command sent: Program ID={program_id}, Task ID={task_id}, "
             f"Primitive=0x{primitive:02x}, Params={hexdump(params, False)}, "
         )
@@ -131,7 +135,7 @@ class MailProtocol(asyncio.Protocol):
             return
 
         if 0x10 not in self.temp_buffer:
-            print("Buffer contains no header; clearing buffer.")
+            logger.debug("Buffer contains no header; clearing buffer.")
             self.temp_buffer = b""
             return
 
@@ -144,7 +148,7 @@ class MailProtocol(asyncio.Protocol):
                 rx_seq = header & 0x07
                 payload_length = self.temp_buffer[2] - 1
                 if len(self.temp_buffer) < 5 + payload_length:
-                    print("Incomplete information frame, waiting for more data.")
+                    logger.debug("Incomplete information frame, waiting for more data.")
                     break
 
                 payload = self.temp_buffer[4 : 4 + payload_length]
@@ -157,23 +161,25 @@ class MailProtocol(asyncio.Protocol):
                         task_id = payload[1]
                         primitive = (payload[3] << 8) | payload[2]
                         mail_params = payload[4:]
-                        print(
+                        logger.info(
                             f"Message Recieved: Program ID={program_id}, Task ID={task_id}, "
                             f"Primitive=0x{primitive:02x}, Params=\n{hexdump(mail_params)}"
                         )
                         self.onMessage(primitive, mail_params)
                     else:
-                        print({"header": header, "payload": hexdump(payload, False)})
+                        logger.info(
+                            {"header": header, "payload": hexdump(payload, False)}
+                        )
                     self.send_supervisory_frame(0, pf)
                 else:
-                    print("Invalid checksum, rejecting frame.")
+                    logger.debug("Invalid checksum, rejecting frame.")
                     self.send_supervisory_frame(1, pf)
                 self.temp_buffer = self.temp_buffer[5 + payload_length :]
             else:
                 unnumbered = header >> 6 & 0x01
                 su_id = (header >> 4) & 0x03
                 if unnumbered:
-                    print(f"SABM frame received. SU_ID={su_id} pf={pf}")
+                    logger.debug(f"SABM frame received. SU_ID={su_id} pf={pf}")
                     self.tx_seq = 0
                     self.rx_seq = 0
                     if pf:
@@ -183,10 +189,10 @@ class MailProtocol(asyncio.Protocol):
                 else:
                     rx_seq = header & 0x07
                     if len(self.temp_buffer) < 5:
-                        print("Incomplete control frame, waiting for more data.")
+                        logger.debug("Incomplete control frame, waiting for more data.")
                         break
                     if su_id == 0:
-                        print(
+                        logger.debug(
                             f"Receive Ready (RR) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
                         )
                         if (
@@ -195,7 +201,7 @@ class MailProtocol(asyncio.Protocol):
                             and self.tx_seq != rx_seq
                         ):
                             self.tx_seq = rx_seq
-                            print("Fast forwarding TxSeq to RXSeq.")
+                            logger.debug("Fast forwarding TxSeq to RXSeq.")
 
                         seqs_to_delete = []
                         for seq in self.outstanding_frames.keys():
@@ -210,7 +216,7 @@ class MailProtocol(asyncio.Protocol):
                         self.flush_message_queue()
 
                     elif su_id == 1:
-                        print(
+                        logger.info(
                             f"Reject (REJ) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
                         )
                         if (
@@ -219,7 +225,7 @@ class MailProtocol(asyncio.Protocol):
                             and self.tx_seq != rx_seq
                         ):
                             self.tx_seq = rx_seq
-                            print("Fast forwarding TxSeq to RXSeq.")
+                            logger.debug("Fast forwarding TxSeq to RXSeq.")
 
                         seqs_to_delete = []
                         for seq in self.outstanding_frames.keys():
@@ -230,25 +236,25 @@ class MailProtocol(asyncio.Protocol):
                             del self.outstanding_frames[seq]
                         self.resend_outstanding_frames()
                     elif su_id == 2:
-                        print(
+                        logger.debug(
                             f"Receiver Not Ready (RNR) frame received. RXSeq={rx_seq} self.TxSeq={self.tx_seq}"
                         )
                     elif su_id == 3:
-                        print("Unnumbered control frame received.")
+                        logger.warning("Unnumbered control frame received.")
                 self.temp_buffer = self.temp_buffer[5:]
 
         if self.temp_buffer:
-            print(f"Leftover bytes in buffer: {hexdump(self.temp_buffer)}")
+            logger.debug(f"Leftover bytes in buffer: {hexdump(self.temp_buffer)}")
             if 0x10 not in self.temp_buffer:
-                print("Buffer contains garbage bytes, clearing buffer.")
+                logger.debug("Buffer contains garbage bytes, clearing buffer.")
                 self.temp_buffer = b""
 
     def resend_outstanding_frames(self):
         if not self.outstanding_frames:
             return
-        print("Resending outstanding frames.")
+        logger.debug("Resending outstanding frames.")
         for seq, frame in self.outstanding_frames.items():
-            print(f"Resending frame: TxSeq={seq}")
+            logger.debug(f"Resending frame: TxSeq={seq}")
             self.transport.write(frame)
 
     async def poll_timer(self):
@@ -260,7 +266,7 @@ class MailProtocol(asyncio.Protocol):
                 if now - start_time >= self.timer_duration
             ]
             for seq in expired_timers:
-                print(f"Poll timer expired for TxSeq={seq}, resending frame.")
+                logger.debug(f"Poll timer expired for TxSeq={seq}, resending frame.")
                 frame = self.outstanding_frames.get(seq)
                 if frame:
                     self.transport.write(frame)
