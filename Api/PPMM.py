@@ -277,3 +277,44 @@ class ApiPpMmLockedInd(BaseCommand):
 class ApiPpMmUnlockedInd(BaseCommand):
     def __init__(self):
         self.Primitive = Commands.API_PP_MM_UNLOCKED_IND
+
+
+class ApiPpMmGetExtHigherLayerCap2Req(BaseCommand):
+
+    def __init__(self):
+        self.Primitive = Commands.API_PP_MM_GET_EXT_HIGHER_LAYER_CAP2_CFM
+
+
+class ApiPpMmGetExtHigherLayerCap2Cfm(BaseCommand):
+    _fields_ = [
+        ("SubscriptionNo", c_uint8),
+        ("FpCapBit24_31", c_uint8),
+        ("FpCapBit32_39", c_uint8),
+        ("FpCapBit40_47", c_uint8),
+    ]
+
+    def __init__(
+        self,
+        fp_cap_bit_24_31: int,
+        fp_cap_bit_32_39: int,
+        fp_cap_bit_40_47: int,
+    ):
+        self.Primitive = Commands.API_PP_MM_GET_EXT_HIGHER_LAYER_CAP2_CFM
+        self.FpCapBit24_31 = fp_cap_bit_24_31
+        self.FpCapBit32_39 = fp_cap_bit_32_39
+        self.FpCapBit40_47 = fp_cap_bit_40_47
+
+    def caps(self):
+        return {
+            "Conference": bool(self.FpCapBit24_31 & 0x01),
+            "PermanentCLIR": bool(self.FpCapBit24_31 & 0x02),
+            "NG_DECT_extended_wideband_voice": bool(self.FpCapBit24_31 & 0x04),
+            "DPRS": (self.FpCapBit24_31 >> 3) & 0x0F,
+            "NG_DECT_wideband_voice": bool(self.FpCapBit24_31 & 0x80),
+            "No_emission": bool(self.FpCapBit32_39 & 0x10),
+            "Multiple_lines": bool(self.FpCapBit32_39 & 0x20),
+            "Call_deflection": bool(self.FpCapBit32_39 & 0x40),
+            "Call_intrusion": bool(self.FpCapBit32_39 & 0x80),
+            "Light_data_services": bool(self.FpCapBit40_47 & 0x04),
+            "Early_encryption": bool(self.FpCapBit40_47 & 0x20),
+        }
