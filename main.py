@@ -69,6 +69,12 @@ from Api.AUDIO import (
 )
 
 
+async def reset_pp(dct: DECT):
+    print(colored("Resetting PP...", "yellow"))
+    await dct.command(ApiPpResetReq(), timeout=20)
+    print(colored("PP reset", "green"))
+
+
 async def reset_nv_storage(dct: DECT):
     print(colored("Resetting NV Storage...", "yellow"))
     await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
@@ -376,6 +382,16 @@ async def main():
     locked = await lock(dct, request_lock=False)
     if not locked:
         locked = await lock(dct, request_lock=True)
+
+    if locked is None:
+        print(
+            colored(
+                "Failed to receive lock reponse. Resetting and exiting. Please try again",
+                "red",
+            )
+        )
+        await reset_pp()
+        sys.exit(1)
 
     if not locked:
         # status = await manual_register(dct)
