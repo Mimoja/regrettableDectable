@@ -4,7 +4,8 @@ from .Api import BaseCommand
 from .Commands import Commands
 from enum import IntEnum
 
-class ApiHalDeviceIdType(ctypes.c_uint8):
+
+class ApiHalDeviceIdType(IntEnum):
     AHD_NONE = 0
     AHD_UART1 = 1
     AHD_UART2 = 2
@@ -14,27 +15,28 @@ class ApiHalDeviceIdType(ctypes.c_uint8):
     AHD_MAX = 6
 
 
-class ApiHalDeviceControlType(ctypes.c_uint8):
+class ApiHalDeviceControlType(IntEnum):
     AHC_NULL = 0
     AHC_DISABLE = 1
     AHC_ENABLE = 2
     AHC_MAX = 3
 
 
-class ApiHalLedCmdIdType(ctypes.c_uint8):
+class ApiHalLedCmdIdType(IntEnum):
     ALI_LED_OFF = 0x00
     ALI_LED_ON = 0x01
     ALI_REPEAT_SEQUENCE = 0x02
     ALI_INVALID = 0xFF
 
 
-class ApiHalAreaType(ctypes.c_uint8):
-    AHA_MEMORY = 0x00
-    AHA_REGISTER = 0x01
-    AHA_NVS = 0x02
-    AHA_DSP = 0x03
-    AHA_FPGA = 0x04
-    AHA_SEQUENCER = 0x05
+class ApiHalAreaType(IntEnum):
+    AHA_MEMORY = 0x00  # Memory mapped area e.g. RAM, flash.
+    AHA_REGISTER = 0x01  # Registers. Length must be 1/2/4 bytes for
+    #                      8/16/32-bits access.
+    AHA_NVS = 0x02  # Non-Volatile Storage (EEPROM).
+    AHA_DSP = 0x03  # DSP.
+    AHA_FPGA = 0x04  # FPGA.
+    AHA_SEQUENCER = 0x05  # Sequencer (DIP).
 
 
 class ApiHalGpioPortPinModeType(ctypes.c_uint8):
@@ -103,8 +105,8 @@ class ApiHalEmptySignalType(BaseCommand):
 
 class ApiHalDeviceControlReqType(BaseCommand):
     _fields_ = [
-        ("DeviceId", ApiHalDeviceIdType),
-        ("Control", ApiHalDeviceControlType),
+        ("DeviceId", c_uint8),
+        ("Control", c_uint8),
     ]
 
     def __init__(self, device_id: ApiHalDeviceIdType, control: ApiHalDeviceControlType):
@@ -115,9 +117,9 @@ class ApiHalDeviceControlReqType(BaseCommand):
 
 class ApiHalDeviceControlCfmType(BaseCommand):
     _fields_ = [
-        ("Status", c_uint16),
-        ("DeviceId", ApiHalDeviceIdType),
-        ("Control", ApiHalDeviceControlType),
+        ("Status", c_uint8),
+        ("DeviceId", c_uint8),
+        ("Control", c_uint8),
     ]
 
     def __init__(
@@ -149,7 +151,7 @@ class ApiHalLedReqType(BaseCommand):
 
 class ApiHalLedCfmType(BaseCommand):
     _fields_ = [
-        ("Status", c_uint16),
+        ("Status", c_uint8),
     ]
 
     def __init__(self, status: int):
@@ -157,19 +159,9 @@ class ApiHalLedCfmType(BaseCommand):
         self.Status = status
 
 
-class HalAreaType(IntEnum):
-    AHA_MEMORY = 0x00  # Memory mapped area e.g. RAM, flash.
-    AHA_REGISTER = 0x01  # Registers. Length must be 1/2/4 bytes for
-    #                      8/16/32-bits access.
-    AHA_NVS = 0x02  # Non-Volatile Storage (EEPROM).
-    AHA_DSP = 0x03  # DSP.
-    AHA_FPGA = 0x04  # FPGA.
-    AHA_SEQUENCER = 0x05  # Sequencer (DIP).
-
-
-class ApiHalReadReqType(BaseCommand):
+class ApiHalReadReq(BaseCommand):
     _fields_ = [
-        ("Area", ApiHalAreaType),
+        ("Area", c_uint8),
         ("Address", c_uint32),
         ("Length", c_uint16),
     ]
@@ -181,32 +173,27 @@ class ApiHalReadReqType(BaseCommand):
         self.Length = length
 
 
-def ApiHalReadCfmType(status: int, area: ApiHalAreaType, address: int, data: bytes):
-    class ApiHalReadCfmTypeClass(BaseCommand):
-        _fields_ = [
-            ("Status", c_uint16),
-            ("Area", ApiHalAreaType),
-            ("Address", c_uint32),
-            ("Length", c_uint16),
-            ("Data", c_uint8 * len(data)),
-        ]
+class ApiHalReadCfm(BaseCommand):
+    _fields_ = [
+        ("Status", c_uint8),
+        ("Area", c_uint8),
+        ("Address", c_uint32),
+        ("Length", c_uint16),
+        ("Data", c_uint8 * 1),
+    ]
 
-        def __init__(
-            self, status: int, area: ApiHalAreaType, address: int, data: bytes
-        ):
-            self.Primitive = Commands.API_HAL_READ_CFM
-            self.Status = status
-            self.Area = area
-            self.Address = address
-            self.Length = len(data)
-            self.Data = data
-
-    return ApiHalReadCfmTypeClass(status, area, address, data)
+    def __init__(self, status: int, area: ApiHalAreaType, address: int, data: bytes):
+        self.Primitive = Commands.API_HAL_READ_CFM
+        self.Status = status
+        self.Area = area
+        self.Address = address
+        self.Length = len(data)
+        self.set_array(self.Data, (c_uint8 * 1)(*data))
 
 
 class ApiHalWriteReq(BaseCommand):
     _fields_ = [
-        ("Area", ApiHalAreaType),
+        ("Area", c_uint8),
         ("Address", c_uint32),
         ("Length", c_uint16),
         ("Data", c_uint8 * 1),
@@ -222,8 +209,8 @@ class ApiHalWriteReq(BaseCommand):
 
 class ApiHalWriteCfmType(BaseCommand):
     _fields_ = [
-        ("Status", c_uint16),
-        ("Area", ApiHalAreaType),
+        ("Status", c_uint8),
+        ("Area", c_uint8),
         ("Address", c_uint32),
         ("Length", c_uint16),
     ]

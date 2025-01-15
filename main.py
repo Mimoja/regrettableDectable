@@ -4,7 +4,7 @@ import sys
 
 import serial_asyncio
 from termcolor import colored
-
+import EepromTypes
 from Api.Api import RsStatusType
 from Api.CC import (
     ApiCcAlertReq,
@@ -26,7 +26,9 @@ from Api.HAL import (
     ApiHalLedCmdType,
     ApiHalLedReqType,
     ApiHalWriteReq,
-    HalAreaType,
+    ApiHalAreaType,
+    ApiHalReadReq,
+    ApiHalReadCfm,
 )
 from Api.IMAGE import ApiImageActivateReq, ApiImageInfoCfm, ApiImageInfoReq
 from Api.INFOELEMENT import (
@@ -67,6 +69,7 @@ from Api.AUDIO import (
     ApiPcmFscLengthType,
     ApiPpAudioMuteRxTxType,
 )
+from EepromDefinitions import EepromDef
 
 
 async def reset_pp(dct: DECT):
