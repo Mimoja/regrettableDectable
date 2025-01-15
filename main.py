@@ -468,6 +468,7 @@ async def main():
                 ApiCcRejectInd(
                     call.ConEi,
                     ApiCcReleaseReasonType.API_RR_NEGOTIATION_NOT_SUPPORTED,
+                    bytes([]),
                 )
             )
             continue
