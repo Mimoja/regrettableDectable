@@ -58,6 +58,15 @@ from APIParser import dectMode
 from Dect import DECT
 from MailProtocol import MailProtocol
 from util import hexdump
+from Api.AUDIO import (
+    ApiPpAudioInitPcmReq,
+    ApiPcmClkType,
+    ApiPpAudioOpenReq,
+    ApiPpAudioUnmuteReq,
+    ApiPcmFscFreqType,
+    ApiPcmFscLengthType,
+    ApiPpAudioMuteRxTxType,
+)
 
 
 async def ensure_pp_mode(dct: DECT):
@@ -363,6 +372,13 @@ async def main():
             ApiCcConnectReq(call.get("ConEi"), codectsIE.to_bytes())
         )
         print(colored("Call connected!", "green"), connect)
+        print(colored("Unmuting", "yellow"))
+
+        await dct.command(
+            ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_BOTH)
+        )
+        print(colored("Unmuted", "green"))
+
         call = await dct.wait_for(
             [
                 Commands.API_CC_REJECT_IND,
