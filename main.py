@@ -195,6 +195,29 @@ async def list_images(dct: DECT):
         print(colored(f"Label: {image['label']}", color))
 
 
+async def blink_led(dct: DECT, led: int):
+    print(colored(f"Blinking the LED {led}...", "blue"))
+    await dct.command(
+        ApiHalLedReqType(
+            led=led,
+            commands=[
+                ApiHalLedCmdType(
+                    command=ApiHalLedCmdIdType.ALI_LED_ON,
+                    duration=300,
+                ),
+                ApiHalLedCmdType(
+                    command=ApiHalLedCmdIdType.ALI_LED_OFF,
+                    duration=300,
+                ),
+                ApiHalLedCmdType(
+                    command=ApiHalLedCmdIdType.ALI_REPEAT_SEQUENCE,
+                    duration=10,
+                ),
+            ],
+        )
+    )
+
+
 async def auto_register(dct: DECT):
     print(colored("Auto registering", "yellow"))
 
@@ -327,6 +350,9 @@ async def main():
 
     # Uncomment to reset the DECT modules NV storage
     # await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
+    await blink_led(dct, 2)
+    await asyncio.sleep(0.250)
+    await blink_led(dct, 3)
 
     await ensure_pp_mode(dct)
     await set_dect_mode(dct)
