@@ -54,6 +54,8 @@ def dectMode(mode_id: int):
             dect_mode = "Japan (2ch)"
         case DectMode.Japan_5ch:
             dect_mode = "Japan (5ch)"
+        case 0xFF:
+            dect_mode = "UNSET (0xFF)"
         case _:
             dect_mode = "Invalid"
     return dect_mode

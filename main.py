@@ -69,6 +69,13 @@ from Api.AUDIO import (
 )
 
 
+async def reset_nv_storage(dct: DECT):
+    print(colored("Resetting NV Storage...", "yellow"))
+    await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
+    await dct.command(ApiPpResetReq(), timeout=20)
+    print(colored("NV Storage reset", "green"))
+
+
 async def ensure_pp_mode(dct: DECT):
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
     pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2)
@@ -105,6 +112,15 @@ async def set_dect_mode(dct: DECT):
         ApiProdTestReq(opcode=PtCommand.PT_CMD_GET_DECT_MODE, data=[0x00])
     )
     dect_mode = prod.getParameters()[0]
+
+    print(colored(f"DECT Mode: {dectMode(dect_mode)} {hex(dect_mode)}", "yellow"))
+    if dect_mode == 0xFF:
+        print(colored("DECT Mode is 0xFF, resetting NVS first...", "red"))
+        await reset_nv_storage(dct)
+        prod = await dct.command(
+            ApiProdTestReq(opcode=PtCommand.PT_CMD_GET_DECT_MODE, data=[0x00])
+        )
+        dect_mode = prod.getParameters()[0]
 
     print(colored(f"DECT Mode: {dectMode(dect_mode)} {hex(dect_mode)}", "yellow"))
     if dect_mode != DectMode.EU:
@@ -349,7 +365,7 @@ async def main():
     await dct.connect()
 
     # Uncomment to reset the DECT modules NV storage
-    # await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
+    # await reset_nv_storage(dct)
     await blink_led(dct, 2)
     await asyncio.sleep(0.250)
     await blink_led(dct, 3)

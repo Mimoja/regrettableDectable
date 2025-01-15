@@ -106,7 +106,7 @@ class DECT:
                 f"[DECT] Unmatched response: {response} (Primitive={Commands(primitive).name})"
             )
 
-    async def wait_for(self, primitive, timeout=1):
+    async def wait_for(self, primitive, timeout=5):
 
         if type(primitive) is not list:
             primitive = [primitive]
