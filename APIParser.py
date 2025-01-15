@@ -100,18 +100,9 @@ def parseMail(primitive, params):
                 return ApiPpMmFpNameInd("")
             return ApiPpMmFpNameInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_SEARCH_IND:
-            print(hexdump(payload))
-            ind = ApiPpMmRegistrationSearchInd.from_bytes(payload)
-            return ind
-        case Commands.API_PROD_TEST_REQ:
-            print(f"OpCode: {params[1]:02x} {params[0]:02x}")
+            return ApiPpMmRegistrationSearchInd.from_bytes(payload)
         case Commands.API_PROD_TEST_CFM:
-            print(f"OpCode: {params[1]:02x} {params[0]:02x}")
-            cfm = ApiProdTestCfm.from_bytes(payload)
-            print("Opcode", cfm.Opcode)
-            print("Param Length=", cfm.ParameterLength)
-            print("Parameters=", cfm.getParameters())
-            return cfm
+            return ApiProdTestCfm.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             return ApiPpMmRegistrationFailedInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
