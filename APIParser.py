@@ -114,6 +114,10 @@ def parseMail(primitive, params):
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             return ApiPpMmRegistrationFailedInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
+            if len(params) == 4:
+                return ApiPpMmRegistrationCompleteInd(
+                    params[0], params[1], 0, bytes([0])
+                )
             return ApiPpMmRegistrationCompleteInd.from_bytes(payload)
         case Commands.API_HAL_LED_CFM:
             print("LEDs toggled.")
