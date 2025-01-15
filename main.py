@@ -466,7 +466,7 @@ async def main():
             print(colored("No codec list received, rejecting call", "red"))
             await dct.command(
                 ApiCcRejectInd(
-                    call.get("ConEi"),
+                    call.ConEi,
                     ApiCcReleaseReasonType.API_RR_NEGOTIATION_NOT_SUPPORTED,
                 )
             )
@@ -476,11 +476,9 @@ async def main():
         # Optionally start alerting
         # Use API_PP_AUDIO_START_TONE_REQ here to play a sound
         # print(colored("Inform FP about our alerting", "yellow"))
-        # await dct.command(ApiCcAlertReq(call.get("ConEi"), bytes()))
+        # await dct.command(ApiCcAlertReq(call.ConEi, bytes()))
 
-        connect = await dct.command(
-            ApiCcConnectReq(call.get("ConEi"), codectsIE.to_bytes())
-        )
+        connect = await dct.command(ApiCcConnectReq(call.ConEi, codectsIE.to_bytes()))
         print(colored("Call connected!", "green"), connect)
         print(colored("Unmuting", "yellow"))
 
