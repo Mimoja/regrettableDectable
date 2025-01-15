@@ -223,7 +223,7 @@ async def list_images(dct: DECT):
 
 
 async def blink_led(dct: DECT, led: int):
-    print(colored(f"Blinking the LED {led}...", "blue"))
+    print(colored(f"Blinking the LED {led}...", "yellow"))
     await dct.command(
         ApiHalLedReq(
             led=led,
@@ -447,10 +447,11 @@ async def main():
         print(colored("Registration successful!", "green"))
         print(colored("Status", "yellow"), status)
 
-    print(colored("Waiting for incoming call...", "yellow"))
     await blink_led(dct, 2)
     await asyncio.sleep(0.250)
     await blink_led(dct, 3)
+
+    print(colored("Waiting for incoming call...", "yellow"))
 
     while True:
         call_resp: ApiCcSetupInd = await dct.wait_for(
