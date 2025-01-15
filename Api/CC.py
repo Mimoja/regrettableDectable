@@ -1,5 +1,5 @@
 from enum import IntEnum
-from .Api import BaseCommand
+from .Api import BaseCommand, VariableSizeCommand, InfoElementCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -55,7 +55,7 @@ class ApiCcProgressIndType(IntEnum):
     API_PROGRESS_INVALID = 0xFF
 
 
-class ApiCcSetupReq(BaseCommand):
+class ApiCcSetupReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("BasicService", c_uint8),
@@ -79,7 +79,7 @@ class ApiCcSetupReq(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcSetupInd(BaseCommand):
+class ApiCcSetupInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("BasicService", c_uint8),
@@ -106,7 +106,7 @@ class ApiCcSetupInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcSetupAckInd(BaseCommand):
+class ApiCcSetupAckInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("ProgressInd", c_uint8),
@@ -130,7 +130,7 @@ class ApiCcSetupAckInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcProcInd(BaseCommand):
+class ApiCcProcInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("ProgressInd", c_uint8),
@@ -154,7 +154,7 @@ class ApiCcProcInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcAlertInd(BaseCommand):
+class ApiCcAlertInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("ProgressInd", c_uint8),
@@ -178,7 +178,7 @@ class ApiCcAlertInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcConnectInd(BaseCommand):
+class ApiCcConnectInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -196,7 +196,7 @@ class ApiCcConnectInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcConnectRes(BaseCommand):
+class ApiCcConnectRes(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -214,7 +214,7 @@ class ApiCcConnectRes(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcConnectReq(BaseCommand):
+class ApiCcConnectReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -245,7 +245,7 @@ class ApiCcConnectCfm(BaseCommand):
         self.ConEi = con_ei
 
 
-class ApiCcAlertReq(BaseCommand):
+class ApiCcAlertReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -263,7 +263,7 @@ class ApiCcAlertReq(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcInfoReq(BaseCommand):
+class ApiCcInfoReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -281,7 +281,7 @@ class ApiCcInfoReq(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcInfoInd(BaseCommand):
+class ApiCcInfoInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("ProgressInd", c_uint8),
@@ -340,7 +340,7 @@ class ApiCcReleaseReasonType(IntEnum):
     API_RR_RE_KEYING_FAILED = 0x42
 
 
-class ApiCcReleaseReq(BaseCommand):
+class ApiCcReleaseReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("Reason", c_uint8),
@@ -361,7 +361,7 @@ class ApiCcReleaseReq(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcReleaseCfm(BaseCommand):
+class ApiCcReleaseCfm(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -379,7 +379,7 @@ class ApiCcReleaseCfm(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcReleaseInd(BaseCommand):
+class ApiCcReleaseInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("Reason", c_uint8),
@@ -400,7 +400,7 @@ class ApiCcReleaseInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcReleaseRes(BaseCommand):
+class ApiCcReleaseRes(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -418,7 +418,7 @@ class ApiCcReleaseRes(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcRejectInd(BaseCommand):
+class ApiCcRejectInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("Reason", c_uint8),
@@ -439,7 +439,7 @@ class ApiCcRejectInd(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcRejectReq(BaseCommand):
+class ApiCcRejectReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("Reason", c_uint8),
@@ -486,7 +486,7 @@ class ApiCcConeiChangeInd(BaseCommand):
         self.NewConEi = new_con_ei
 
 
-class ApiCcModifyCodecReq(BaseCommand):
+class ApiCcModifyCodecReq(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),
@@ -520,7 +520,7 @@ class ApiCcModifyCodecCfm(BaseCommand):
         self.Status = status.value
 
 
-class ApiCcModifyCodecInd(BaseCommand):
+class ApiCcModifyCodecInd(InfoElementCommand):
     _fields_ = [
         ("ConEi", c_uint16),
         ("InfoElementLength", c_uint16),

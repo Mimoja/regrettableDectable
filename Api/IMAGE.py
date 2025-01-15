@@ -5,8 +5,7 @@ from ctypes import (
 )
 from enum import IntEnum
 from .Commands import Commands
-from .Api import BaseCommand, RsStatusType
-import datetime
+from .Api import BaseCommand, RsStatusType, VariableSizeCommand
 
 
 class ApiImageID(IntEnum):
@@ -28,7 +27,7 @@ class ApiImageInfoReq(BaseCommand):
         self.ImageIndex = image
 
 
-class ApiImageInfoCfm(BaseCommand):
+class ApiImageInfoCfm(VariableSizeCommand):
 
     _fields_ = [
         ("Status", c_uint8),

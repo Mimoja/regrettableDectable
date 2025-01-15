@@ -115,10 +115,6 @@ def parseMail(primitive, params):
         case Commands.API_PP_MM_REGISTRATION_FAILED_IND:
             return ApiPpMmRegistrationFailedInd.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_COMPLETE_IND:
-            if len(params) == 4:
-                return ApiPpMmRegistrationCompleteInd(
-                    params[0], params[1], 0, bytes([0])
-                )
             return ApiPpMmRegistrationCompleteInd.from_bytes(payload)
         case Commands.API_HAL_LED_CFM:
             print("LEDs toggled.")
@@ -132,8 +128,6 @@ def parseMail(primitive, params):
             else:
                 return ApiImageInfoCfm(params[0], params[1], 0, 0, b"", 0, b"")
         case Commands.API_PP_MM_LOCKED_IND:
-            if len(params) == 6:
-                payload += bytes([0])
             return ApiPpMmLockedInd.from_bytes(payload)
         case Commands.API_PP_MM_UNLOCKED_IND:
             return ApiPpMmUnlockedInd.from_bytes(payload)
@@ -142,14 +136,10 @@ def parseMail(primitive, params):
         case Commands.API_CC_SETUP_IND:
             return ApiCcSetupInd.from_bytes(payload)
         case Commands.API_CC_RELEASE_IND:
-            if len(params) == 5:
-                payload += bytes([0])
             return ApiCcReleaseInd.from_bytes(payload)
         case Commands.API_CC_RELEASE_CFM:
             return ApiCcReleaseCfm.from_bytes(payload)
         case Commands.API_CC_REJECT_IND:
-            if len(params) == 5:
-                payload += bytes([0])
             return ApiCcRejectInd.from_bytes(payload)
         case Commands.API_CC_INFO_IND:
             return ApiCcInfoInd.from_bytes(payload)

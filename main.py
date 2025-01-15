@@ -348,7 +348,7 @@ async def manual_register(dct: DECT):
     return status
 
 
-def parse_call(call_resp):
+def parse_call(call_resp: ApiCcSetupInd):
     call = call_resp.to_dict()
     print(colored("We are beeing called:", "yellow"))
     print(colored("Connection (E)ID:", "yellow"), call.get("ConEi"))
@@ -366,7 +366,7 @@ def parse_call(call_resp):
     )
     print(colored("Signal:", "yellow"), ApiCcSignalType(call.get("Signal")).name)
 
-    infoElements = parseInfoElements(call.get("InfoElement"))
+    infoElements = call_resp.infoElements()
     codectsIE: InfoElement = None
     for ie in infoElements:
         match ie.type:
@@ -388,7 +388,7 @@ async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
     )
     if read_answer.Status != RsStatusType.RSS_SUCCESS:
         return None
-    data = read_answer.to_dict().get("Data")
+    data = read_answer.data()
     target.from_bytes(bytes(data))
     return target
 
@@ -493,10 +493,11 @@ async def main():
         print(colored("Call connected!", "green"), connect)
         print(colored("Unmuting", "yellow"))
 
-        await dct.command(
+        unmuted = await dct.command(
             ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_BOTH)
         )
-        print(colored("Unmuted", "green"))
+        if unmuted:
+            print(colored("Unmuted", "green"))
 
         call = await dct.wait_for(
             [

@@ -11,7 +11,7 @@ from ctypes import (
     POINTER,
 )
 from typing import Optional, Type
-from .Api import BaseCommand
+from .Api import BaseCommand, VariableSizeCommand, InfoElementCommand
 from .Commands import Commands
 from enum import IntEnum
 
@@ -34,7 +34,7 @@ class ApiPpMmRegistrationSearchReq(BaseCommand):
             self.SearchMode = search_mode.value
 
 
-class ApiPpMmFpNameInd(BaseCommand):
+class ApiPpMmFpNameInd(VariableSizeCommand):
     _fields_ = [
         ("NameLength", c_uint16),
         ("Name", c_uint8 * 1),  # Placeholder for variable-length field
@@ -145,7 +145,7 @@ class ApiPpMmRegistrationSelectedReq(BaseCommand):
         self.Rfpi = (c_uint8 * 5)(*rfpi)
 
 
-class ApiPpMmRegistrationCompleteInd(BaseCommand):
+class ApiPpMmRegistrationCompleteInd(InfoElementCommand):
     _fields_ = [
         ("HandsetId", c_uint8),
         ("KnownFp", c_uint8),
@@ -224,7 +224,7 @@ class ApiPpMmLockedReq(BaseCommand):
         self.Primitive = Commands.API_PP_MM_LOCKED_REQ
 
 
-class ApiPpMmLockedInd(BaseCommand):
+class ApiPpMmLockedInd(InfoElementCommand):
     _fields_ = [
         ("SubscriptionNo", c_uint8),
         ("FpCapBit24_31", c_uint8),

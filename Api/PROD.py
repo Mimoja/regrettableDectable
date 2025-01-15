@@ -1,4 +1,4 @@
-from .Api import BaseCommand
+from .Api import BaseCommand, VariableSizeCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure, ARRAY
 from enum import IntEnum
@@ -19,7 +19,7 @@ class DectMode(IntEnum):
     Japan_5ch = 11
 
 
-class ApiProdTestReq(BaseCommand):
+class ApiProdTestReq(VariableSizeCommand):
     _pack_ = 1
     _fields_ = [
         ("Opcode", c_uint16),
@@ -34,7 +34,7 @@ class ApiProdTestReq(BaseCommand):
         self.set_array(self.Parameters, (c_uint8 * len(data))(*data))
 
 
-class ApiProdTestCfm(BaseCommand):
+class ApiProdTestCfm(VariableSizeCommand):
     _fields_ = [
         ("Opcode", c_uint16),
         ("ParameterLength", c_uint16),

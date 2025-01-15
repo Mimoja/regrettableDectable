@@ -1,6 +1,6 @@
 import ctypes
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
-from .Api import BaseCommand
+from .Api import BaseCommand, VariableSizeCommand
 from .Commands import Commands
 from enum import IntEnum
 
@@ -173,7 +173,7 @@ class ApiHalReadReq(BaseCommand):
         self.Length = length
 
 
-class ApiHalReadCfm(BaseCommand):
+class ApiHalReadCfm(VariableSizeCommand):
     _fields_ = [
         ("Status", c_uint8),
         ("Area", c_uint8),
@@ -191,7 +191,7 @@ class ApiHalReadCfm(BaseCommand):
         self.set_array(self.Data, (c_uint8 * 1)(*data))
 
 
-class ApiHalWriteReq(BaseCommand):
+class ApiHalWriteReq(VariableSizeCommand):
     _fields_ = [
         ("Area", c_uint8),
         ("Address", c_uint32),

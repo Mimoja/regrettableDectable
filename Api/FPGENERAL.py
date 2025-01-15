@@ -1,4 +1,4 @@
-from .Api import BaseCommand
+from .Api import BaseCommand, InfoElementCommand
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -31,7 +31,7 @@ class ApiFpGetFwVersionReq(BaseCommand):
         self.Primitive = Commands.API_FP_GET_FW_VERSION_REQ
 
 
-class ApiFpGetFwVersionCfm(BaseCommand):
+class ApiFpGetFwVersionCfm(InfoElementCommand):
 
     _fields_ = [
         ("Status", c_uint8),

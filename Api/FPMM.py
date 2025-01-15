@@ -2,7 +2,7 @@ from enum import IntEnum
 from ctypes import (
     c_uint8,
 )
-from .Api import BaseCommand
+from .Api import BaseCommand, VariableSizeCommand
 from .Commands import Commands
 
 # -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class ApiFpMmGetAccessCodeCfm(BaseCommand):
         self.Ac = (c_uint8 * 4)(*access_code)
 
 
-class ApiFpMmSetNameReq(BaseCommand):
+class ApiFpMmSetNameReq(VariableSizeCommand):
     _fields_ = [
         ("Length", c_uint8),
         ("Data", c_uint8 * 1),  # Placeholder for dynamic field
@@ -111,7 +111,7 @@ class ApiFpMmSetNameReq(BaseCommand):
         self.set_array(self.Data, (c_uint8 * self.Length)(*name.encode()))
 
 
-class ApiFpMmGetNameCfm(BaseCommand):
+class ApiFpMmGetNameCfm(VariableSizeCommand):
     _fields_ = [
         ("Status", c_uint8),
         ("Max", c_uint8),

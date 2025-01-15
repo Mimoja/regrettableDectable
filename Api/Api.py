@@ -9,6 +9,7 @@ import ctypes
 import datetime
 
 from enum import Enum, auto, IntEnum
+from Api.INFOELEMENT import parseInfoElements
 
 
 class RsStatusType(IntEnum):
@@ -144,8 +145,9 @@ class BaseCommand(Structure):
             raise ValueError(f"Data too short for {cls.__name__}")
         cmd = cls.from_buffer_copy(data)
         if len(data) > sizeof(cls):
-            cmd._last_field_original_end = ctypes.sizeof(cmd)
-            ctypes.resize(cmd, len(data))
+            raise ValueError(
+                f"Data too long for {cls.__name__}. Use VariableSizeCommand instead"
+            )
         cmd._raw_ = data
         return cmd
 
@@ -196,3 +198,37 @@ class BaseCommand(Structure):
             )
         except ValueError:
             return None
+
+
+class VariableSizeCommand(BaseCommand):
+    def data(self):
+        length_field_name = self._fields_[-2][0]
+        last_field_name = self._fields_[-1][0]
+
+        length = getattr(self, length_field_name)
+        if length == 0:
+            return []
+
+        val = getattr(self, last_field_name)
+        val = list(val)
+        if self._last_field_original_end:
+            val += self.to_bytes()[self._last_field_original_end :]
+        return val
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> "VariableSizeCommand":
+        """Deserializes bytes into a command object."""
+        if len(data) < sizeof(cls):
+            data += bytes([0])
+
+        cmd = cls.from_buffer_copy(data)
+        if len(data) > sizeof(cls):
+            cmd._last_field_original_end = ctypes.sizeof(cmd)
+            ctypes.resize(cmd, len(data))
+        cmd._raw_ = data
+        return cmd
+
+
+class InfoElementCommand(VariableSizeCommand):
+    def infoElements(self):
+        return parseInfoElements(self.data())
