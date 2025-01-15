@@ -338,7 +338,6 @@ class ApiCcReleaseReasonType(IntEnum):
     API_RR_SECURITY_ATTACK_ASSUMED = 0x40
     API_RR_ENCRYPTION_ACTIVATION_FAILED = 0x41
     API_RR_RE_KEYING_FAILED = 0x42
-    API_RR_MAX = 0x43  # (just marking the last +1 value)
 
 
 class ApiCcReleaseReq(BaseCommand):
@@ -461,12 +460,12 @@ class ApiCcRejectReq(BaseCommand):
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
 
-class ApiCcGetConeiReq(BaseCommand):
+class ApiCcGetConEiReq(BaseCommand):
     def __init__(self):
         self.Primitive = Commands.API_CC_GET_CONEI_REQ
 
 
-class ApiCcGetConeiCfm(BaseCommand):
+class ApiCcGetConEiCfm(BaseCommand):
     def __init__(self):
         self.Primitive = Commands.API_CC_GET_CONEI_CFM
 

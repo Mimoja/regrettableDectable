@@ -154,14 +154,11 @@ class ApiPpMmRegistrationCompleteInd(BaseCommand):
     ]
 
     def __init__(self, handsetId: int, KnownFp: bool, info: bytes):
-        self.Primitive = Commands.API_PP_MM_REGISTRATION_FAILED_IND
+        self.Primitive = Commands.API_PP_MM_REGISTRATION_COMPLETE_IND
         self.HandsetId = handsetId
         self.KnownFp = KnownFp
         self.InfoElementLength = len(info)
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
-
-    def __str__(self):
-        return self.to_bytes()[4:].decode()
 
 
 class ApiPpMmRejectReason(IntEnum):

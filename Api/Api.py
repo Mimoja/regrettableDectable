@@ -144,7 +144,6 @@ class BaseCommand(Structure):
             raise ValueError(f"Data too short for {cls.__name__}")
         cmd = cls.from_buffer_copy(data)
         if len(data) > sizeof(cls):
-
             cmd._last_field_original_end = ctypes.sizeof(cmd)
             ctypes.resize(cmd, len(data))
         cmd._raw_ = data

@@ -1,4 +1,6 @@
 from enum import IntEnum
+from termcolor import colored
+from struct import unpack
 
 
 class InfoElements(IntEnum):
@@ -87,3 +89,197 @@ class InfoElements(IntEnum):
     API_IE_AUDIO_EXT_POINTER = 0x3001
     API_IE_AUDIO_EXT_ARRAY = 0x3002
     API_IE_INVALID = 0xFFFF
+
+
+class InfoElement:
+    def __init__(self, type: int, data: bytes):
+        self.type = type
+        self.data = data
+
+    def to_bytes(self):
+        data = self.data
+        if isinstance(data, list):
+            data = bytes(data)
+        return (
+            self.type.to_bytes(2, byteorder="big")
+            + len(self.data).to_bytes(2, byteorder="big")
+            + data
+        )
+
+    def __str__(self):
+        try:
+            type_name = InfoElements(self.type).name
+        except ValueError:
+            type_name = f"Unknown {hex(self.type)}"
+        return (
+            f"Type: {type_name}, Length: {len(self.data)}, Content: {list(self.data)}"
+        )
+
+
+def parseInfoElements(data: bytes):
+    elements = []
+    while len(data) > 0:
+        type = int.from_bytes(data[0:2], byteorder="little")
+        ie_length = int.from_bytes(data[2:3], byteorder="little")
+        content = data[3 : 3 + ie_length]
+        info = InfoElement(type, content)
+        elements.append(info)
+        data = data[3 + ie_length :]
+
+    return elements
+
+
+class ApiCodecType(IntEnum):
+    API_CT_NONE = 0x00  # Codec not specified or not relevant.
+    API_CT_USER_SPECIFIC_32 = 0x01  # user specific, information transfer rate 32 kbit/s
+    API_CT_G726 = 0x02  # G.726 ADPCM, information transfer rate 32 kbit/s
+    API_CT_G722 = 0x03  # G.722, information transfer rate 64 kbit/s
+    API_CT_G711A = 0x04  # G.711 a-law PCM, information transfer rate 64 kbit/s
+    API_CT_G711U = 0x05  # G.711 u-law PCM, information transfer rate 64 kbit/s
+    API_CT_G7291 = 0x06  # G.729.1, information transfer rate 32 kbit/s
+    API_CT_MP4_32 = 0x07  # MPEG-4 ER AAC-LD, information transfer rate 32 kbit/s
+    API_CT_MP4_64 = 0x08  # MPEG-4 ER AAC-LD, information transfer rate 64 kbit/s
+    API_CT_USER_SPECIFIC_64 = 0x09  # user specific, information transfer rate 64 kbit/s
+
+
+class ApiNegotiationIndicatorType(IntEnum):
+
+    API_NI_NOT_POSSIBLE = 0x00
+    API_NI_POSSIBLE = 0x01
+
+
+class ApiMacDlcServiceType(IntEnum):
+    API_MDS_1_MD = 0x00
+    API_MDS_1_ND = 0x01
+    API_MDS_1_IED = 0x02
+    API_MDS_1_IQED = 0x03
+    API_MDS_7_ND = 0x04
+    API_MDS_1_NDF = 0x05
+
+
+class ApiCplaneRoutingType(IntEnum):
+    API_CPR_CS = 0x00
+    API_CPR_CS_CF = 0x01
+    API_CPR_CF_CS = 0x02
+    API_CPR_CF = 0x03
+
+
+class ApiSlotSizeType(IntEnum):
+    API_SS_HS = 0x00
+    API_SS_LS640 = 0x01
+    API_SS_LS672 = 0x02
+    API_SS_FS = 0x04
+    API_SS_DS = 0x05
+
+
+class ApiCodecInfoType:
+    def __init__(self, codec, mac_dlc_service, cplane_routing, slot_size):
+        self.codec = codec
+        self.mac_dlc_service = mac_dlc_service
+        self.cplane_routing = cplane_routing
+        self.slot_size = slot_size
+
+    @classmethod
+    def from_bytes(cls, data):
+        codec, mac_dlc_service, cplane_routing, slot_size = unpack("<BBBB", data[:4])
+        return cls(codec, mac_dlc_service, cplane_routing, slot_size)
+
+    def __str__(self):
+        return f"Codec: {ApiCodecType(self.codec).name}, MacDlcService: {ApiMacDlcServiceType(self.mac_dlc_service).name}, CplaneRouting: {ApiCplaneRoutingType(self.cplane_routing).name}, SlotSize: {ApiSlotSizeType(self.slot_size).name}"
+
+
+class ApiCodecListType:
+    def __init__(self, negotiation_indicator: ApiNegotiationIndicatorType, codecs):
+        self.negotiation_indicator = negotiation_indicator
+        self.codecs = codecs
+
+    @classmethod
+    def from_bytes(cls, data: bytes | list):
+        if isinstance(data, list):
+            data = bytes(data)
+        negotiation_indicator, no_of_codecs = unpack("<BB", data[:2])
+        codecs = []
+        offset = 2
+        for _ in range(no_of_codecs):
+            codec_info = ApiCodecInfoType.from_bytes(data[offset : offset + 4])
+            codecs.append(codec_info)
+            offset += 4
+        return cls(negotiation_indicator, codecs)
+
+    def __str__(self):
+        codecs_str = ", ".join(str(codec) for codec in self.codecs)
+        return f"NegotiationIndicator: {ApiNegotiationIndicatorType(self.negotiation_indicator).name}, Codecs: [{codecs_str}]"
+
+
+class ApiNumberTypeType(IntEnum):
+    ANT_UNKNOWN = 0x00  # Unknown
+    ANT_INTERNATIONAL = 0x01  # International number
+    ANT_NATIONAL = 0x02  # National number
+    ANT_NETWORK_SPECIFIC = 0x03  # Network specific number
+    ANT_SUBSCRIBER = 0x04  # Subscriber number
+    ANT_ABBREVIATED = 0x06  # Abbreviated number
+    ANT_INVALID = 0xFF  # Invalid
+
+
+class ApiNpiType(IntEnum):
+    ANPI_UNKNOWN = 0x00  # Unknown
+    ANPI_E164_ISDN = 0x01  # ISDN/telephony plan ITU-T Recommendations E.164/E.163
+    ANPI_X121 = 0x03  # Data plan ITU-T Recommendation X.121
+    ANPI_TCP_IP = 0x07  # TCP/IP address
+    ANPI_NATIONAL = 0x08  # National standard plan
+    ANPI_PRIVATE = 0x09  # Private plan
+    ANPI_SIP = 0x0A  # SIP addressing scheme, To: or From: field (see RFC 3261)
+    ANPI_INTERNET = 0x0B  # Internet character format address
+    ANPI_LAN_MAC = 0x0C  # LAN MAC address
+    ANPI_X400 = 0x0D  # ITU-T Recommendation X.400 [63] address
+    ANPI_PROFILE_SERVICE = 0x0E  # Profile service specific alphanumeric identifier
+    ANPI_INVALID = 0xFF  # Invalid
+
+
+class ApiPresentationIndicatorType(IntEnum):
+    API_PRESENTATION_ALLOWED = 0x00  # Presentation allowed.
+    API_PRESENTATION_RESTRICTED = 0x01  # Presentation restricted.
+    API_PRESENTATION_NUMBER_NA = 0x02  # Number not available.
+    API_PRESENTATION_HANSET_LOCATOR = 0x03  # Used to locate physically handsets (have them ring) f. ex.by pressing a physical or logical button on the FP.
+    API_INVALID = 0xFF  # [0x04; 0xFF] is reserved.
+
+
+class ApiScreeningIndicatorType(IntEnum):
+    API_USER_PROVIDED_NOT_SCREENED = 0x00  # User-provided, not screened.
+    API_USER_PROVIDED_VERIFIED_PASSED = 0x01  # User-provided, verified and passed.
+    API_USER_PROVIDED_VERIFIED_FAILED = 0x02  # User-provided, verified and failed.
+    API_NETWORK_PROVIDED = 0x03  # Network provided.
+    API_SCR_INVALID = 0xFF  # [0x04; 0xFF] is reserved.
+
+
+class ApiCallingPartyNumberType:
+    def __init__(
+        self, number_type, npi, presentation_ind, screening_ind, number_length, number
+    ):
+        self.number_type = number_type
+        self.npi = npi
+        self.presentation_ind = presentation_ind
+        self.screening_ind = screening_ind
+        self.number_length = number_length
+        self.number = number
+
+    @classmethod
+    def from_bytes(cls, data):
+        number_type = ApiNumberTypeType(data[0])
+        npi = ApiNpiType(data[1])
+        presentation_ind = ApiPresentationIndicatorType(data[2])
+        screening_ind = ApiScreeningIndicatorType(data[3])
+        number_length = data[4]
+        number = bytes(data[5 : 5 + number_length]).decode("ascii")
+        return cls(
+            number_type, npi, presentation_ind, screening_ind, number_length, number
+        )
+
+    def __str__(self):
+        return (
+            f"Number: {self.number}, "
+            f"NumberType: {ApiNumberTypeType(self.number_type).name}, "
+            f"Npi: {ApiNpiType(self.npi).name}, "
+            f"PresentationInd: {ApiPresentationIndicatorType(self.presentation_ind).name}, "
+            f"ScreeningInd: {ApiScreeningIndicatorType(self.screening_ind).name}"
+        )

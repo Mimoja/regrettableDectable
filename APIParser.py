@@ -15,6 +15,14 @@ from Api.PPMM import (
     ApiPpMmRegistrationCompleteInd,
     ApiPpMmUnlockedInd,
 )
+from Api.CC import (
+    ApiCcSetupInd,
+    ApiCcReleaseInd,
+    ApiCcReleaseCfm,
+    ApiCcInfoInd,
+    ApiCcConnectCfm,
+    ApiCcRejectInd,
+)
 from Api.Api import RsStatusType
 from util import hexdump
 
@@ -115,22 +123,29 @@ def parseMail(primitive, params):
             else:
                 return ApiImageInfoCfm(params[0], params[1], 0, 0, b"", 0, b"")
         case Commands.API_PP_MM_LOCKED_IND:
+            if len(params) == 6:
+                payload += bytes([0])
             return ApiPpMmLockedInd.from_bytes(payload)
         case Commands.API_PP_MM_UNLOCKED_IND:
             return ApiPpMmUnlockedInd.from_bytes(payload)
-        case Commands.API_IMAGE_INFO_CFM:
-            try:
-                cfm = ApiImageInfoCfm.from_bytes(payload)
-                print("Status", cfm.Status)
-                print("ImageIndex", cfm.ImageIndex)
-                print("ImageId", cfm.ImageId)
-                print("DeviceId", cfm.DeviceId)
-                print("LinkDate", cfm.LinkDate)
-                print("NameLength", cfm.NameLength)
-                print("LabelLength", cfm.LabelLength)
-                print("Data", cfm.Data.decode("utf-8"))
-            except Exception:
-                pass
+
+        # """CC Commands"""
+        case Commands.API_CC_SETUP_IND:
+            return ApiCcSetupInd.from_bytes(payload)
+        case Commands.API_CC_RELEASE_IND:
+            if len(params) == 5:
+                payload += bytes([0])
+            return ApiCcReleaseInd.from_bytes(payload)
+        case Commands.API_CC_RELEASE_CFM:
+            return ApiCcReleaseCfm.from_bytes(payload)
+        case Commands.API_CC_REJECT_IND:
+            if len(params) == 5:
+                payload += bytes([0])
+            return ApiCcRejectInd.from_bytes(payload)
+        case Commands.API_CC_INFO_IND:
+            return ApiCcInfoInd.from_bytes(payload)
+        case Commands.API_CC_CONNECT_CFM:
+            return ApiCcConnectCfm.from_bytes(payload)
 
         case Commands.RTX_EAP_TARGET_RESET_IND:
             print("RTX_EAP_TARGET_RESET_IND recieved")
