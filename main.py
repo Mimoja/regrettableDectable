@@ -249,16 +249,25 @@ async def auto_register(dct: DECT):
         timeout=0,
     )
 
-    status = await dct.wait_for(
-        [
-            Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
-            Commands.API_PP_MM_REGISTRATION_FAILED_IND,
-        ],
-        timeout=40,
-    )
-    if not status:
-        print(colored("Registration status not received!", "red"))
-        sys.exit(1)
+    total_time = 0
+    while True:
+        timeout = 5
+        status = await dct.wait_for(
+            [
+                Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
+                Commands.API_PP_MM_REGISTRATION_FAILED_IND,
+            ],
+            timeout=timeout,
+        )
+        total_time += timeout
+        if not status:
+            print(
+                colored(
+                    f"Registration status not yet received after {total_time}", "red"
+                )
+            )
+        else:
+            break
 
     if status.Primitive == Commands.API_PP_MM_REGISTRATION_FAILED_IND:
         print(colored("Registration failed!", "red"))
