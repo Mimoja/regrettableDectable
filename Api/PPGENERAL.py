@@ -1,4 +1,4 @@
-from .Api import BaseCommand, InfoElementCommand
+from .Api import BaseCommand, InfoElementCommand, RsStatusType
 from .Commands import Commands
 from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
@@ -152,3 +152,20 @@ class ApiPpSyncTimeReq(BaseCommand):
     def __init__(self, terminal_id: int):
         self.Primitive = Commands.API_PP_SYNC_TIME_REQ
         self.TerminalId = terminal_id
+
+    API_PP_SET_TIME_REQ = 0x5207
+    API_PP_SET_TIME_CFM = 0x5208
+    API_PP_GET_TIME_REQ = 0x5209
+    API_PP_GET_TIME_CFM = 0x520A
+    API_PP_SYNC_TIME_REQ = 0x520B
+
+
+class ApiPpSetTimeCfm(BaseCommand):
+
+    _fields_ = [
+        ("Status", c_uint8),
+    ]
+
+    def __init__(self, status: RsStatusType):
+        self.Primitive = Commands.API_PP_SET_TIME_CFM
+        self.Status = status

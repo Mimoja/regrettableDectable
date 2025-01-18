@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import sys
+import struct
 
 import serial_asyncio
 from termcolor import colored
@@ -32,11 +33,18 @@ from Api.HAL import (
 )
 from Api.IMAGE import ApiImageActivateReq, ApiImageInfoCfm, ApiImageInfoReq
 from Api.INFOELEMENT import (
-    ApiCallingPartyNumberType,
+    ApiCallingPartyNumber,
     ApiCodecListType,
     InfoElement,
+    ApiCallingPartyName,
     InfoElements,
     parseInfoElements,
+    ApiCodecInfoType,
+    ApiCodecType,
+    ApiMacDlcServiceType,
+    ApiCplaneRoutingType,
+    ApiSlotSizeType,
+    ApiNegotiationIndicatorType,
 )
 from Api.PPGENERAL import ApiPpGetFwVersionReq, ApiPpResetReq
 from Api.PPMM import (
@@ -64,10 +72,12 @@ from Api.AUDIO import (
     ApiPpAudioInitPcmReq,
     ApiPcmClkType,
     ApiPpAudioOpenReq,
+    ApiPpAudioModeType,
     ApiPpAudioUnmuteReq,
     ApiPcmFscFreqType,
     ApiPcmFscLengthType,
     ApiPpAudioMuteRxTxType,
+    ApiPpAudioSetVolumeReq,
 )
 from EepromDefinitions import EepromDef
 
@@ -87,7 +97,7 @@ async def reset_nv_storage(dct: DECT):
 
 async def ensure_pp_mode(dct: DECT):
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
-    pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2)
+    pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2, timeout=2)
 
     if not pp_version:
         print(colored("Sending 'API_FP_GET_FW_VERSION' request command...", "yellow"))
@@ -101,8 +111,8 @@ async def ensure_pp_mode(dct: DECT):
             print(
                 colored("Sending 'API_IMAGE_ACTIVATE_REQ' request command...", "yellow")
             )
-            await dct.command(ApiImageActivateReq(0x00, False))
-            await asyncio.sleep(12)
+            await dct.command(ApiImageActivateReq(0x01, False))
+            await dct.wait_for(Commands.API_PP_RESET_IND, timeout=30)
         else:
             print(colored("DECT Chip is in unknown mode", "yellow"))
             sys.exit(1)
@@ -150,6 +160,9 @@ async def set_dect_mode(dct: DECT):
         if dect_mode != DectMode.EU:
             print(colored("Failed to set DECT Mode to EU", "red"))
             sys.exit(1)
+        print(colored("DECT Mode setting seemingly requires a reset", "green"))
+        await dct.command(ApiPpResetReq(), timeout=0)
+        await dct.wait_for(Commands.API_PP_RESET_IND, timeout=30)
 
 
 async def lock(dct: DECT, request_lock=False):
@@ -256,7 +269,12 @@ async def auto_register(dct: DECT):
 
     total_time = 0
     while True:
-        timeout = 5
+        timeout = 10
+        await dct.command(
+            ApiPpMmRegistrationAutoReq(1, bytes([0xFF, 0xFF, 0x00, 0x00])),
+            max_retries=1,
+            timeout=0,
+        )
         status = await dct.wait_for(
             [
                 Commands.API_PP_MM_REGISTRATION_COMPLETE_IND,
@@ -357,19 +375,22 @@ def parse_call(call: ApiCcSetupInd):
     print(colored("Signal:", "yellow"), ApiCcSignalType(call.Signal).name)
 
     infoElements = call.infoElements()
-    codectsIE: InfoElement = None
+    codecsIE: InfoElement = None
     for ie in infoElements:
         match ie.type:
             case InfoElements.API_IE_CALLING_PARTY_NUMBER:
-                callingNumber = ApiCallingPartyNumberType.from_bytes(ie.data)
-                print(colored("\tCalling Party Number:", "yellow"), callingNumber)
+                calling_number = ApiCallingPartyNumber.from_bytes(ie.data)
+                print(colored("\tCalling Party Number:", "yellow"), calling_number)
+            case InfoElements.API_IE_CALLING_PARTY_NAME:
+                calling_name = ApiCallingPartyName.from_bytes(ie.data)
+                print(colored("\tCalling Party Name:", "yellow"), calling_name)
             case InfoElements.API_IE_CODEC_LIST:
                 codects = ApiCodecListType.from_bytes(ie.data)
                 print(colored("\tCodecs:", "yellow"), codects)
-                codectsIE = ie
+                codecsIE = ie
             case _:
                 print(colored("\tInfo Element (Unparsed):", "yellow"), ie)
-    return codectsIE, call
+    return codecsIE, call
 
 
 async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
@@ -384,7 +405,6 @@ async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
 
 
 async def known_fps(dct: DECT):
-
     for target in [
         EepromDef.EepromNotInRam.Subs0,
         EepromDef.EepromNotInRam.Subs1,
@@ -397,6 +417,47 @@ async def known_fps(dct: DECT):
         if sub.RFPI.values != [0xFF, 0xFF, 0xFF, 0xFF, 0xFF]:
             return True
     return False
+
+
+async def config_audio(dct: DECT):
+    print(colored("Configuring audio...", "yellow"))
+
+    # print(colored("Setting PCM...", "yellow"))
+    # cmd = ApiPpAudioInitPcmReq(
+    #     IsMaster=1,
+    #     Reserved=0,
+    #     PcmFscFreq=ApiPcmFscFreqType.AP_FSC_FREQ_16KHZ,
+    #     PcmFscLength=0x03,
+    #     PcmFscStartAligned=0x01,
+    #     PcmClk=ApiPcmClkType.AP_PCM_CLK_4608,
+    #     PcmClkOnRising=0x01,
+    #     PcmClksPerBit=0x01,
+    #     PcmFscInvert=0,
+    #     PcmCh0Delay=0,
+    #     PcmDoutIsOpenDrain=0,
+    #     PcmIsOpenDrain=0,
+    # )
+    # print(hexdump(cmd.to_bytes()))
+    # pcm_init = await dct.command(cmd)
+
+    # if pcm_init.Status != RsStatusType.RSS_SUCCESS:
+    #     print(
+    #         colored(f"Failed to init PCM: {RsStatusType(pcm_init.Status).name}", "red")
+    #     )
+
+    print(colored("Setting Audio volume...", "yellow"))
+    await dct.command(ApiPpAudioSetVolumeReq(volume=0))
+
+    print(colored("Opening Audio...", "yellow"))
+    await dct.command(ApiPpAudioOpenReq(ApiPpAudioModeType.API_AUDIO_MODE_PCM0))
+
+
+async def get_ipei(dct):
+    Ipei = await read_eeprom(dct, EepromDef.EepromInRam.Ipei)
+    Ipei = Ipei.values
+    man = ((Ipei[0] & 0x0F) << 12) + (Ipei[1] << 4) + ((Ipei[2] & 0xF0) >> 4)
+    dev = ((Ipei[2] & 0x0F) << 16) + (Ipei[3] << 8) + Ipei[4]
+    print(colored("IPEI:", "yellow"), f"{man:05d}", " ", f"{dev:07d}")
 
 
 async def main():
@@ -412,6 +473,7 @@ async def main():
 
     # Uncomment to reset the DECT modules NV storage
     # await reset_nv_storage(dct)
+    await get_ipei(dct)
     await ensure_pp_mode(dct)
     await set_dect_mode(dct)
     await list_images(dct)
@@ -430,7 +492,7 @@ async def main():
     if not locked:
         can_lock = await known_fps(dct)
         if can_lock:
-            print(colored("Found a known FP", "green"))
+            print(colored("Found a known FP in EEPROM. Trying to connect", "green"))
             locked = await lock(dct, request_lock=True)
         else:
             print(
@@ -460,45 +522,75 @@ async def main():
             ],
             timeout=None,
         )
-        codectsIE, call = parse_call(call_resp)
+        codecsIE, call = parse_call(call_resp)
 
-        if not codectsIE:
-            print(colored("No codec list received, rejecting call", "red"))
-            await dct.command(
-                ApiCcRejectInd(
-                    call.ConEi,
-                    ApiCcReleaseReasonType.API_RR_NEGOTIATION_NOT_SUPPORTED,
-                    bytes([]),
-                )
+        if not codecsIE:
+            print(colored("No codec list received, building our own", "red"))
+            single_codec = ApiCodecInfoType(
+                ApiCodecType.API_CT_G722,
+                ApiMacDlcServiceType.API_MDS_1_MD,
+                ApiCplaneRoutingType.API_CPR_CS,
+                ApiSlotSizeType.API_SS_LS640,
             )
-            continue
+            codecsIE = ApiCodecListType(
+                ApiNegotiationIndicatorType.API_NI_NOT_POSSIBLE, codecs=[single_codec]
+            )
+            print(colored("Using G722 codec", "yellow"))
+            print(colored("Codecs:", "yellow"), codecsIE)
 
-        print(colored("Accepting call...", "yellow"))
+        print(colored("Sending Alert status...", "yellow"))
+        await dct.command(ApiCcAlertReq(call.ConEi, bytes()), max_retries=1, timeout=0)
+
         # Optionally start alerting
         # Use API_PP_AUDIO_START_TONE_REQ here to play a sound
         # print(colored("Inform FP about our alerting", "yellow"))
         # await dct.command(ApiCcAlertReq(call.ConEi, bytes()))
+        await config_audio(dct)
 
-        connect = await dct.command(ApiCcConnectReq(call.ConEi, codectsIE.to_bytes()))
+        print(colored("Accepting call...", "yellow"))
+
+        connect = await dct.command(
+            ApiCcConnectReq(call.ConEi, codecsIE.to_bytes()), max_retries=3, timeout=1
+        )
         print(colored("Call connected!", "green"), connect)
         print(colored("Unmuting", "yellow"))
 
         unmuted = await dct.command(
-            ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_BOTH)
+            ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_TX),
+            max_retries=100,
+            timeout=1,
         )
         if unmuted:
             print(colored("Unmuted", "green"))
+            break
 
-        call = await dct.wait_for(
-            [
-                Commands.API_CC_REJECT_IND,
-            ],
-            timeout=None,
-        )
-        print(colored("Call ended!", "magenta"), call)
+        while True:
+            call = await dct.wait_for(
+                [
+                    Commands.API_CC_INFO_IND,
+                    Commands.API_CC_RELEASE_IND,
+                    Commands.API_CC_REJECT_IND,
+                ],
+                timeout=None,
+            )
+            match call.Primitive:
+                case Commands.API_CC_INFO_IND:
+                    print(colored("Call info:", "yellow"), call)
+                case Commands.API_CC_RELEASE_IND:
+                    print(colored("Call release!", "magenta"), call)
+                    await dct.command(
+                        ApiCcRejectInd(
+                            call.ConEi,
+                            ApiCcReleaseReasonType.API_RR_USER_REJECTION,
+                            bytes([]),
+                        )
+                    )
+                    break
+                case Commands.API_CC_REJECT_IND:
+                    print(colored("Call ended!", "magenta"), call)
+                    break
 
     await asyncio.Future()
-
 
 if __name__ == "__main__":
 

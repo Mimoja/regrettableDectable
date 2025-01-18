@@ -67,10 +67,10 @@ class ApiPpAudioInitPcmReq(BaseCommand):
         self,
         IsMaster,
         Reserved,
-        PcmFscFreq,
-        PcmFscLength,
+        PcmFscFreq: ApiPcmFscFreqType,
+        PcmFscLength: ApiPcmFscLengthType,
         PcmFscStartAligned,
-        PcmClk,
+        PcmClk: ApiPcmClkType,
         PcmClkOnRising,
         PcmClksPerBit,
         PcmFscInvert,
@@ -93,9 +93,53 @@ class ApiPpAudioInitPcmReq(BaseCommand):
         self.PcmIsOpenDrain = PcmIsOpenDrain
 
 
+class ApiPpAudioInitPcmCfm(BaseCommand):
+    _fields_ = [
+        # Controls whether the device is master or slave on the PCM interface.
+        ("Status", c_uint8)
+    ]
+
+    def __init__(self, status: RsStatusType):
+        self.Primitive = Commands.API_PP_AUDIO_MUTE_REQ
+        self.Status = status
+
+
+class ApiPpAudioModeType(IntEnum):
+
+    API_AUDIO_MODE_EARPIECE = 0x00  # PP Audio output through the earpiece
+    API_AUDIO_MODE_HEADSET = 0x01  # PP Audio output through the earpiece
+    API_AUDIO_MODE_HANDSFREE = (
+        0x02  # PP Audio output through the Handsfree speakerphone
+    )
+    API_AUDIO_MODE_PCM0 = 0x03  # PP Audio output through the PCM 0 channel
+    API_AUDIO_MODE_I2S_SW_LEFT = (
+        0x10  # PP Audio output mode I2S, Subwoofer, left channel
+    )
+    API_AUDIO_MODE_I2S_SW_RIGHT = (
+        0x11  # PP Audio output mode I2S, Subwoofer, right channel
+    )
+    API_AUDIO_MODE_I2S_SW_MIX = (
+        0x12  # PP Audio output mode I2S, Subwoofer, left/right mix
+    )
+    API_AUDIO_MODE_USB_RX_STEREO = (
+        0x13  # PP Audio output mode USB, 48KHz stereo Rx only
+    )
+
+
 class ApiPpAudioOpenReq(BaseCommand):
-    def __init__(self):
+    _fields_ = [("Mode", c_uint8)]
+
+    def __init__(self, mode: ApiPpAudioModeType):
         self.Primitive = Commands.API_PP_AUDIO_OPEN_REQ
+        self.Mode = mode
+
+
+class ApiPpAudioSetVolumeReq(BaseCommand):
+    _fields_ = [("Volume", c_uint8)]
+
+    def __init__(self, volume: int):
+        self.Primitive = Commands.API_PP_AUDIO_SET_VOLUME_REQ
+        self.Volume = volume
 
 
 class ApiPpAudioMuteRxTxType(IntEnum):

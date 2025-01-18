@@ -1,6 +1,6 @@
 from enum import IntEnum
 from termcolor import colored
-from struct import unpack
+from struct import unpack, pack, pack_into
 
 
 class InfoElements(IntEnum):
@@ -119,10 +119,10 @@ class InfoElement:
 def parseInfoElements(data: bytes):
     elements = []
     while len(data) > 0:
-        type = int.from_bytes(data[0:2], byteorder="little")
+        ie_type = int.from_bytes(data[0:2], byteorder="little")
         ie_length = int.from_bytes(data[2:3], byteorder="little")
         content = data[3 : 3 + ie_length]
-        info = InfoElement(type, content)
+        info = InfoElement(ie_type, content)
         elements.append(info)
         data = data[3 + ie_length :]
 
@@ -173,23 +173,45 @@ class ApiSlotSizeType(IntEnum):
 
 
 class ApiCodecInfoType:
-    def __init__(self, codec, mac_dlc_service, cplane_routing, slot_size):
+
+    def __init__(
+        self,
+        codec: ApiCodecType,
+        mac_dlc_service: ApiMacDlcServiceType,
+        cplane_routing: ApiCplaneRoutingType,
+        slot_size: ApiSlotSizeType,
+    ):
         self.codec = codec
         self.mac_dlc_service = mac_dlc_service
         self.cplane_routing = cplane_routing
-        self.slot_size = slot_size
+        self.slot_size = slot_size  #
 
     @classmethod
     def from_bytes(cls, data):
         codec, mac_dlc_service, cplane_routing, slot_size = unpack("<BBBB", data[:4])
         return cls(codec, mac_dlc_service, cplane_routing, slot_size)
 
+    def to_bytes(self):
+        return pack(
+            "<BBBB",
+            self.codec,
+            self.mac_dlc_service,
+            self.cplane_routing,
+            self.slot_size,
+        )
+
     def __str__(self):
         return f"Codec: {ApiCodecType(self.codec).name}, MacDlcService: {ApiMacDlcServiceType(self.mac_dlc_service).name}, CplaneRouting: {ApiCplaneRoutingType(self.cplane_routing).name}, SlotSize: {ApiSlotSizeType(self.slot_size).name}"
 
 
-class ApiCodecListType:
-    def __init__(self, negotiation_indicator: ApiNegotiationIndicatorType, codecs):
+class ApiCodecListType(InfoElement):
+
+    def __init__(
+        self,
+        negotiation_indicator: ApiNegotiationIndicatorType,
+        codecs: ApiCodecInfoType,
+    ):
+        self.type = InfoElements.API_IE_CODEC_LIST
         self.negotiation_indicator = negotiation_indicator
         self.codecs = codecs
 
@@ -204,7 +226,14 @@ class ApiCodecListType:
             codec_info = ApiCodecInfoType.from_bytes(data[offset : offset + 4])
             codecs.append(codec_info)
             offset += 4
-        return cls(negotiation_indicator, codecs)
+        return cls(negotiation_indicator, codecs)  #
+
+    def to_bytes(self):
+        res = pack("<BB", self.negotiation_indicator, len(self.codecs))
+        for codec in self.codecs:
+            res += codec.to_bytes()
+        self.data = res
+        return super().to_bytes()
 
     def __str__(self):
         codecs_str = ", ".join(str(codec) for codec in self.codecs)
@@ -252,15 +281,13 @@ class ApiScreeningIndicatorType(IntEnum):
     API_SCR_INVALID = 0xFF  # [0x04; 0xFF] is reserved.
 
 
-class ApiCallingPartyNumberType:
-    def __init__(
-        self, number_type, npi, presentation_ind, screening_ind, number_length, number
-    ):
+class ApiCallingPartyNumber(InfoElement):
+    def __init__(self, number_type, npi, presentation_ind, screening_ind, number):
+        self.type = InfoElements.API_IE_CALLING_PARTY_NUMBER
         self.number_type = number_type
         self.npi = npi
         self.presentation_ind = presentation_ind
         self.screening_ind = screening_ind
-        self.number_length = number_length
         self.number = number
 
     @classmethod
@@ -271,15 +298,56 @@ class ApiCallingPartyNumberType:
         screening_ind = ApiScreeningIndicatorType(data[3])
         number_length = data[4]
         number = bytes(data[5 : 5 + number_length]).decode("ascii")
-        return cls(
-            number_type, npi, presentation_ind, screening_ind, number_length, number
-        )
+        new = cls(number_type, npi, presentation_ind, screening_ind, number)
+        new.data = data
+        return new
 
     def __str__(self):
         return (
             f"Number: {self.number}, "
             f"NumberType: {ApiNumberTypeType(self.number_type).name}, "
             f"Npi: {ApiNpiType(self.npi).name}, "
+            f"PresentationInd: {ApiPresentationIndicatorType(self.presentation_ind).name}, "
+            f"ScreeningInd: {ApiScreeningIndicatorType(self.screening_ind).name}"
+        )
+
+
+class ApiUsedAlphabetType(IntEnum):
+    AUA_DECT = 0x00  # IA5 chars used.
+    AUA_UTF8 = 0x01  # UTF-8 chars used.
+    AUA_NETWORK_SPECIFIC = 0xFF
+
+
+class ApiCallingPartyName(InfoElement):
+    def __init__(
+        self,
+        used_alphabet: ApiUsedAlphabetType,
+        presentation_ind,
+        screening_ind,
+        name,
+    ):
+        self.type = InfoElements.API_IE_CALLING_PARTY_NAME
+        self.used_alphabet = used_alphabet
+        self.presentation_ind = presentation_ind
+        self.screening_ind = screening_ind
+        self.name = name
+
+    @classmethod
+    def from_bytes(cls, data):
+        used_alphabet = ApiNumberTypeType(data[0])
+        presentation_ind = ApiPresentationIndicatorType(data[1])
+        screening_ind = ApiScreeningIndicatorType(data[2])
+        name_length = data[3]
+        name = bytes(data[4 : 4 + name_length]).decode(
+            "ascii" if used_alphabet == ApiUsedAlphabetType.AUA_DECT else "utf-8"
+        )
+        new = cls(used_alphabet, presentation_ind, screening_ind, name)
+        new.data = data
+        return new
+
+    def __str__(self):
+        return (
+            f"Name: {self.name}, "
             f"PresentationInd: {ApiPresentationIndicatorType(self.presentation_ind).name}, "
             f"ScreeningInd: {ApiScreeningIndicatorType(self.screening_ind).name}"
         )

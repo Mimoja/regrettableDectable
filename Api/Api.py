@@ -212,11 +212,15 @@ class VariableSizeCommand(BaseCommand):
         val = getattr(self, last_field_name)
         val_size = ctypes.sizeof(val)
         val_class = val[0].__class__
+        is_byte_array = "ubyte" in self._fields_[-1][1].__name__ or val_size == 1
         vals = list(val)
         if self._last_field_original_end:
             data_left = self.to_bytes()[self._last_field_original_end :]
             while len(data_left) > 0:
-                new_val = val_class.from_buffer_copy(data_left)
+                if is_byte_array:
+                    new_val = int(data_left[0])
+                else:
+                    new_val = val_class.from_buffer_copy(data_left)
                 vals.append(new_val)
                 data_left = data_left[val_size:]
 
@@ -237,6 +241,23 @@ class VariableSizeCommand(BaseCommand):
             ctypes.resize(cmd, len(data))
         cmd._raw_ = data
         return cmd
+
+    def __str__(self):
+        length_field_name = self._fields_[-2][0]
+        last_field_name = self._fields_[-1][0]
+
+        formated = self.to_dict()
+        # convert integers to hex
+        for key, value in formated.items():
+            if isinstance(value, int):
+                formated[key] = hex(value)
+            if isinstance(value, list):
+                formated[key] = [hex(x) for x in value]
+            if key == last_field_name and formated[length_field_name] == 0:
+                formated[key] = []
+
+        # stringify the dict
+        return str(formated)
 
 
 class InfoElementCommand(VariableSizeCommand):

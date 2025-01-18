@@ -304,6 +304,14 @@ class ApiCcInfoInd(InfoElementCommand):
         self.InfoElementLength = len(info)
         self.set_array(self.InfoElement, (c_uint8 * len(info))(*info))
 
+    def __str__(self):
+        return (
+            f"ConEI: {self.ConEi}, "
+            f"ProgressInd: {ApiCcProgressIndType(self.ProgressInd).name}, "
+            f"Signal: {ApiCcSignalType(self.Signal).name}, "
+            f"InfoElement: {[str(i) for i in self.infoElements()]}"
+        )
+
 
 class ApiCcReleaseReasonType(IntEnum):
     API_RR_NORMAL = 0x00

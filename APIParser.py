@@ -2,7 +2,7 @@ from Api.Commands import Commands
 from Api.IMAGE import ApiImageActivateCfm, ApiImageInfoCfm
 from Api.PROD import ApiProdTestCfm
 from termcolor import colored
-from Api.PPGENERAL import ApiPpGetFwVersionCfm
+from Api.PPGENERAL import ApiPpGetFwVersionCfm, ApiPpSetTimeCfm
 from Api.FPGENERAL import ApiFpGetFwVersionCfm
 from enum import Enum
 from Api.PROD import DectMode
@@ -25,6 +25,7 @@ from Api.CC import (
 )
 from Api.HAL import ApiHalReadCfm, ApiHalLedCfm
 from Api.Api import RsStatusType
+from Api.AUDIO import ApiPpAudioInitPcmCfm
 from util import hexdump
 
 
@@ -99,6 +100,10 @@ def parseMail(primitive, params):
             if len(params) == 1:
                 return ApiPpMmFpNameInd("")
             return ApiPpMmFpNameInd.from_bytes(payload)
+        case Commands.API_PP_AUDIO_INIT_PCM_CFM:
+            return ApiPpAudioInitPcmCfm.from_bytes(payload)
+        case Commands.API_PP_SET_TIME_CFM:
+            return ApiPpSetTimeCfm.from_bytes(payload)
         case Commands.API_PP_MM_REGISTRATION_SEARCH_IND:
             return ApiPpMmRegistrationSearchInd.from_bytes(payload)
         case Commands.API_PROD_TEST_CFM:

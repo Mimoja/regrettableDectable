@@ -79,7 +79,6 @@ class ApiHalAdcIdType(ctypes.c_uint8):
     VBAT = 0x05
     TEMPERATURE_SENSOR = 0x06
     PARALLEL_SET_DETECTION_OPAMP = 0x07
-    MAX_ADC_ENTRIES = 0x08
 
 
 # Structures
