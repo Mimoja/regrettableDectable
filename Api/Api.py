@@ -13,6 +13,10 @@ from Api.INFOELEMENT import parseInfoElements
 
 
 class RsStatusType(IntEnum):
+    """
+    Enumeration of response status types for DECT API commands.
+    Defines all possible status codes that can be returned by the DECT device.
+    """
     RSS_SUCCESS = 0x00  # The request completed successfully.
     RSS_NOT_SUPPORTED = 0x01  # The request is not supported.
     RSS_BAD_ARGUMENTS = 0x02  # One or more arguments are not correct.
@@ -77,7 +81,15 @@ class RsStatusType(IntEnum):
 
 
 class BaseCommand(Structure):
-    """Base class for all commands."""
+    """
+    Base class for all DECT API commands.
+    Provides serialization and deserialization functionality for command structures.
+
+    Attributes:
+        Primitive (c_uint16): The opcode/primitive identifier for the command
+        _raw_ (bytes): Raw bytes representation of the command
+        _last_field_original_end (int): Original end position of the last field
+    """
 
     _pack_ = 1
     _fields_ = [
@@ -88,12 +100,25 @@ class BaseCommand(Structure):
     _last_field_original_end = None
 
     def to_bytes(self) -> bytes:
-        """Serializes the command to bytes."""
+        """
+        Serialize the command to bytes.
+
+        Returns:
+            bytes: Serialized command data
+        """
         if self._raw_:
             return self._raw_
         return bytes(self)
 
     def set_array(self, entry, data):
+        """
+        Set an array field in the command structure.
+        Handles resizing the structure to accommodate variable-length arrays.
+
+        Args:
+            entry: Array field to set
+            data: Data to set in the array
+        """
         # We cannot access data[0] to get the size on zero sized arrays
         # therefore we trust that the single element array is enoug
         size = ctypes.sizeof(entry)
@@ -114,6 +139,17 @@ class BaseCommand(Structure):
 
     @staticmethod
     def _set_size(entry, new_size):
+        """
+        Internal method to set the size of a ctypes array.
+        Uses low-level memory manipulation to resize arrays.
+
+        Args:
+            entry: Array to resize
+            new_size: New size for the array
+
+        Returns:
+            The resized array
+        """
         address = id(entry)
         print(hex(address))
         # the incredibly illegal version
@@ -140,7 +176,18 @@ class BaseCommand(Structure):
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "BaseCommand":
-        """Deserializes bytes into a command object."""
+        """
+        Create a command object from bytes.
+
+        Args:
+            data (bytes): Serialized command data
+
+        Returns:
+            BaseCommand: New command instance
+
+        Raises:
+            ValueError: If data length doesn't match command structure
+        """
         if len(data) < sizeof(cls):
             raise ValueError(f"Data too short for {cls.__name__}")
         cmd = cls.from_buffer_copy(data)
@@ -152,9 +199,22 @@ class BaseCommand(Structure):
         return cmd
 
     def primitive(self):
+        """
+        Get the command's primitive identifier.
+
+        Returns:
+            int: The primitive/opcode value
+        """
         return self.Primitive
 
     def to_dict(self):
+        """
+        Convert the command to a dictionary representation.
+        Handles special cases for array fields and oversized last fields.
+
+        Returns:
+            dict: Dictionary containing command fields and values
+        """
         # This comes from the baseclass and is sometimes not included therefore
         ret = {"Primitive": hex(self.Primitive)}
         # In case the last field is oversized we need to include it manually
@@ -172,6 +232,13 @@ class BaseCommand(Structure):
         return ret
 
     def __str__(self):
+        """
+        Create a string representation of the command.
+        Converts numeric values to hexadecimal format.
+
+        Returns:
+            str: String representation of the command
+        """
         formated = self.to_dict()
         # convert integers to hex
         for key, value in formated.items():
@@ -185,6 +252,15 @@ class BaseCommand(Structure):
 
     @staticmethod
     def parseDate(date: bytes | list) -> datetime:
+        """
+        Parse a date from bytes or list format.
+
+        Args:
+            date (Union[bytes, list]): Date data to parse
+
+        Returns:
+            datetime: Parsed datetime object, or None if parsing fails
+        """
         if date is None:
             return None
 
@@ -201,7 +277,18 @@ class BaseCommand(Structure):
 
 
 class VariableSizeCommand(BaseCommand):
+    """
+    Command class that supports variable-sized data fields.
+    Extends BaseCommand with functionality for handling variable-length data.
+    """
+
     def data(self):
+        """
+        Get the variable-length data from the command.
+
+        Returns:
+            list: List of data values
+        """
         length_field_name = self._fields_[-2][0]
         last_field_name = self._fields_[-1][0]
 
@@ -227,11 +314,25 @@ class VariableSizeCommand(BaseCommand):
         return vals
 
     def data_bytes(self):
+        """
+        Get the variable-length data as bytes.
+
+        Returns:
+            bytes: Raw data bytes
+        """
         return b"".join([bytes(x) for x in self.data()])
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "VariableSizeCommand":
-        """Deserializes bytes into a command object."""
+        """
+        Create a variable-size command from bytes.
+
+        Args:
+            data (bytes): Serialized command data
+
+        Returns:
+            VariableSizeCommand: New command instance
+        """
         if len(data) < sizeof(cls):
             data += bytes([0])
 
@@ -243,6 +344,12 @@ class VariableSizeCommand(BaseCommand):
         return cmd
 
     def __str__(self):
+        """
+        Create a string representation of the variable-size command.
+
+        Returns:
+            str: String representation of the command
+        """
         length_field_name = self._fields_[-2][0]
         last_field_name = self._fields_[-1][0]
 
@@ -261,5 +368,16 @@ class VariableSizeCommand(BaseCommand):
 
 
 class InfoElementCommand(VariableSizeCommand):
+    """
+    Command class that contains information elements.
+    Extends VariableSizeCommand with functionality for handling info elements.
+    """
+
     def infoElements(self):
-        return parseInfoElements(self.data())
+        """
+        Parse and return the information elements contained in the command.
+
+        Returns:
+            list: List of parsed information elements
+        """
+        return parseInfoElements(self.data_bytes())

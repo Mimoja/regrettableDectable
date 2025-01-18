@@ -4,6 +4,10 @@ from struct import unpack, pack, pack_into
 
 
 class InfoElements(IntEnum):
+    """
+    Enumeration of DECT Information Element types.
+    Defines all possible information elements that can be exchanged in DECT messages.
+    """
     API_IE_CODEC_LIST = 0x0001
     API_IE_MULTIKEYPAD = 0x0002
     API_IE_MULTI_DISPLAY = 0x0003
@@ -92,11 +96,29 @@ class InfoElements(IntEnum):
 
 
 class InfoElement:
+    """
+    Base class for DECT Information Elements.
+    Provides functionality for handling information element data and serialization.
+    """
+
     def __init__(self, type: int, data: bytes):
+        """
+        Initialize an Information Element.
+
+        Args:
+            type (int): Information element type identifier
+            data (bytes): Raw data content of the element
+        """
         self.type = type
         self.data = data
 
     def to_bytes(self):
+        """
+        Serialize the information element to bytes.
+
+        Returns:
+            bytes: Serialized information element including type, length, and data
+        """
         data = self.data
         if isinstance(data, list):
             data = bytes(data)
@@ -107,6 +129,12 @@ class InfoElement:
         )
 
     def __str__(self):
+        """
+        Create a string representation of the information element.
+
+        Returns:
+            str: String representation including type name, length, and content
+        """
         try:
             type_name = InfoElements(self.type).name
         except ValueError:
@@ -117,6 +145,15 @@ class InfoElement:
 
 
 def parseInfoElements(data: bytes):
+    """
+    Parse a sequence of information elements from bytes.
+
+    Args:
+        data (bytes): Raw bytes containing one or more information elements
+
+    Returns:
+        list: List of parsed InfoElement objects
+    """
     elements = []
     while len(data) > 0:
         ie_type = int.from_bytes(data[0:2], byteorder="little")
@@ -130,6 +167,10 @@ def parseInfoElements(data: bytes):
 
 
 class ApiCodecType(IntEnum):
+    """
+    Enumeration of supported audio codec types.
+    Defines codecs with their respective information transfer rates.
+    """
     API_CT_NONE = 0x00  # Codec not specified or not relevant.
     API_CT_USER_SPECIFIC_32 = 0x01  # user specific, information transfer rate 32 kbit/s
     API_CT_G726 = 0x02  # G.726 ADPCM, information transfer rate 32 kbit/s
@@ -143,12 +184,19 @@ class ApiCodecType(IntEnum):
 
 
 class ApiNegotiationIndicatorType(IntEnum):
-
+    """
+    Enumeration of codec negotiation capabilities.
+    Indicates whether codec negotiation is possible.
+    """
     API_NI_NOT_POSSIBLE = 0x00
     API_NI_POSSIBLE = 0x01
 
 
 class ApiMacDlcServiceType(IntEnum):
+    """
+    Enumeration of MAC layer DLC service types.
+    Defines different MAC layer service configurations.
+    """
     API_MDS_1_MD = 0x00
     API_MDS_1_ND = 0x01
     API_MDS_1_IED = 0x02
@@ -158,6 +206,10 @@ class ApiMacDlcServiceType(IntEnum):
 
 
 class ApiCplaneRoutingType(IntEnum):
+    """
+    Enumeration of C-plane routing types.
+    Defines different control plane routing configurations.
+    """
     API_CPR_CS = 0x00
     API_CPR_CS_CF = 0x01
     API_CPR_CF_CS = 0x02
@@ -165,6 +217,10 @@ class ApiCplaneRoutingType(IntEnum):
 
 
 class ApiSlotSizeType(IntEnum):
+    """
+    Enumeration of DECT slot size types.
+    Defines different slot sizes for DECT frame structure.
+    """
     API_SS_HS = 0x00
     API_SS_LS640 = 0x01
     API_SS_LS672 = 0x02
@@ -173,6 +229,10 @@ class ApiSlotSizeType(IntEnum):
 
 
 class ApiCodecInfoType:
+    """
+    Class representing codec configuration information.
+    Combines codec type with MAC/DLC service, routing, and slot size settings.
+    """
 
     def __init__(
         self,
@@ -181,6 +241,15 @@ class ApiCodecInfoType:
         cplane_routing: ApiCplaneRoutingType,
         slot_size: ApiSlotSizeType,
     ):
+        """
+        Initialize codec information.
+
+        Args:
+            codec (ApiCodecType): Type of codec to use
+            mac_dlc_service (ApiMacDlcServiceType): MAC layer service type
+            cplane_routing (ApiCplaneRoutingType): Control plane routing type
+            slot_size (ApiSlotSizeType): DECT slot size configuration
+        """
         self.codec = codec
         self.mac_dlc_service = mac_dlc_service
         self.cplane_routing = cplane_routing
@@ -188,10 +257,25 @@ class ApiCodecInfoType:
 
     @classmethod
     def from_bytes(cls, data):
+        """
+        Create codec information from bytes.
+
+        Args:
+            data (bytes): Raw bytes containing codec information
+
+        Returns:
+            ApiCodecInfoType: New codec information instance
+        """
         codec, mac_dlc_service, cplane_routing, slot_size = unpack("<BBBB", data[:4])
         return cls(codec, mac_dlc_service, cplane_routing, slot_size)
 
     def to_bytes(self):
+        """
+        Serialize codec information to bytes.
+
+        Returns:
+            bytes: Serialized codec information
+        """
         return pack(
             "<BBBB",
             self.codec,
@@ -201,22 +285,48 @@ class ApiCodecInfoType:
         )
 
     def __str__(self):
+        """
+        Create a string representation of codec information.
+
+        Returns:
+            str: String representation with all codec settings
+        """
         return f"Codec: {ApiCodecType(self.codec).name}, MacDlcService: {ApiMacDlcServiceType(self.mac_dlc_service).name}, CplaneRouting: {ApiCplaneRoutingType(self.cplane_routing).name}, SlotSize: {ApiSlotSizeType(self.slot_size).name}"
 
 
 class ApiCodecListType(InfoElement):
+    """
+    Information element containing a list of supported codecs.
+    Includes negotiation capability and codec configurations.
+    """
 
     def __init__(
         self,
         negotiation_indicator: ApiNegotiationIndicatorType,
         codecs: ApiCodecInfoType,
     ):
+        """
+        Initialize codec list.
+
+        Args:
+            negotiation_indicator (ApiNegotiationIndicatorType): Codec negotiation capability
+            codecs (ApiCodecInfoType): List of supported codec configurations
+        """
         self.type = InfoElements.API_IE_CODEC_LIST
         self.negotiation_indicator = negotiation_indicator
         self.codecs = codecs
 
     @classmethod
     def from_bytes(cls, data: bytes | list):
+        """
+        Create codec list from bytes.
+
+        Args:
+            data (Union[bytes, list]): Raw data containing codec list
+
+        Returns:
+            ApiCodecListType: New codec list instance
+        """
         if isinstance(data, list):
             data = bytes(data)
         negotiation_indicator, no_of_codecs = unpack("<BB", data[:2])
@@ -229,6 +339,12 @@ class ApiCodecListType(InfoElement):
         return cls(negotiation_indicator, codecs)  #
 
     def to_bytes(self):
+        """
+        Serialize codec list to bytes.
+
+        Returns:
+            bytes: Serialized codec list information
+        """
         res = pack("<BB", self.negotiation_indicator, len(self.codecs))
         for codec in self.codecs:
             res += codec.to_bytes()
@@ -236,11 +352,21 @@ class ApiCodecListType(InfoElement):
         return super().to_bytes()
 
     def __str__(self):
+        """
+        Create a string representation of the codec list.
+
+        Returns:
+            str: String representation including negotiation indicator and codecs
+        """
         codecs_str = ", ".join(str(codec) for codec in self.codecs)
         return f"NegotiationIndicator: {ApiNegotiationIndicatorType(self.negotiation_indicator).name}, Codecs: [{codecs_str}]"
 
 
 class ApiNumberTypeType(IntEnum):
+    """
+    Enumeration of number types.
+    Defines different formats for telephone numbers.
+    """
     ANT_UNKNOWN = 0x00  # Unknown
     ANT_INTERNATIONAL = 0x01  # International number
     ANT_NATIONAL = 0x02  # National number
@@ -251,6 +377,10 @@ class ApiNumberTypeType(IntEnum):
 
 
 class ApiNpiType(IntEnum):
+    """
+    Enumeration of Numbering Plan Identification types.
+    Defines different numbering plans for addressing.
+    """
     ANPI_UNKNOWN = 0x00  # Unknown
     ANPI_E164_ISDN = 0x01  # ISDN/telephony plan ITU-T Recommendations E.164/E.163
     ANPI_X121 = 0x03  # Data plan ITU-T Recommendation X.121
@@ -266,6 +396,10 @@ class ApiNpiType(IntEnum):
 
 
 class ApiPresentationIndicatorType(IntEnum):
+    """
+    Enumeration of presentation indicator types.
+    Defines whether caller information can be displayed.
+    """
     API_PRESENTATION_ALLOWED = 0x00  # Presentation allowed.
     API_PRESENTATION_RESTRICTED = 0x01  # Presentation restricted.
     API_PRESENTATION_NUMBER_NA = 0x02  # Number not available.
@@ -274,6 +408,10 @@ class ApiPresentationIndicatorType(IntEnum):
 
 
 class ApiScreeningIndicatorType(IntEnum):
+    """
+    Enumeration of screening indicator types.
+    Defines the verification status of caller information.
+    """
     API_USER_PROVIDED_NOT_SCREENED = 0x00  # User-provided, not screened.
     API_USER_PROVIDED_VERIFIED_PASSED = 0x01  # User-provided, verified and passed.
     API_USER_PROVIDED_VERIFIED_FAILED = 0x02  # User-provided, verified and failed.
@@ -282,7 +420,22 @@ class ApiScreeningIndicatorType(IntEnum):
 
 
 class ApiCallingPartyNumber(InfoElement):
+    """
+    Information element containing calling party number information.
+    Includes number type, format, and presentation settings.
+    """
+
     def __init__(self, number_type, npi, presentation_ind, screening_ind, number):
+        """
+        Initialize calling party number information.
+
+        Args:
+            number_type: Type of telephone number
+            npi: Numbering plan identification
+            presentation_ind: Presentation permission indicator
+            screening_ind: Number screening status
+            number: The actual telephone number
+        """
         self.type = InfoElements.API_IE_CALLING_PARTY_NUMBER
         self.number_type = number_type
         self.npi = npi
@@ -292,6 +445,15 @@ class ApiCallingPartyNumber(InfoElement):
 
     @classmethod
     def from_bytes(cls, data):
+        """
+        Create calling party number information from bytes.
+
+        Args:
+            data (bytes): Raw data containing number information
+
+        Returns:
+            ApiCallingPartyNumber: New calling party number instance
+        """
         number_type = ApiNumberTypeType(data[0])
         npi = ApiNpiType(data[1])
         presentation_ind = ApiPresentationIndicatorType(data[2])
@@ -303,6 +465,12 @@ class ApiCallingPartyNumber(InfoElement):
         return new
 
     def __str__(self):
+        """
+        Create a string representation of calling party number information.
+
+        Returns:
+            str: String representation including all number attributes
+        """
         return (
             f"Number: {self.number}, "
             f"NumberType: {ApiNumberTypeType(self.number_type).name}, "
@@ -313,12 +481,21 @@ class ApiCallingPartyNumber(InfoElement):
 
 
 class ApiUsedAlphabetType(IntEnum):
+    """
+    Enumeration of character encoding types.
+    Defines supported character encodings for names.
+    """
     AUA_DECT = 0x00  # IA5 chars used.
     AUA_UTF8 = 0x01  # UTF-8 chars used.
     AUA_NETWORK_SPECIFIC = 0xFF
 
 
 class ApiCallingPartyName(InfoElement):
+    """
+    Information element containing calling party name information.
+    Includes character encoding and presentation settings.
+    """
+
     def __init__(
         self,
         used_alphabet: ApiUsedAlphabetType,
@@ -326,6 +503,15 @@ class ApiCallingPartyName(InfoElement):
         screening_ind,
         name,
     ):
+        """
+        Initialize calling party name information.
+
+        Args:
+            used_alphabet (ApiUsedAlphabetType): Character encoding used
+            presentation_ind: Presentation permission indicator
+            screening_ind: Name screening status
+            name: The actual caller name
+        """
         self.type = InfoElements.API_IE_CALLING_PARTY_NAME
         self.used_alphabet = used_alphabet
         self.presentation_ind = presentation_ind
@@ -334,20 +520,31 @@ class ApiCallingPartyName(InfoElement):
 
     @classmethod
     def from_bytes(cls, data):
+        """
+        Create calling party name information from bytes.
+
+        Args:
+            data (bytes): Raw data containing name information
+
+        Returns:
+            ApiCallingPartyName: New calling party name instance
+        """
         used_alphabet = ApiNumberTypeType(data[0])
         presentation_ind = ApiPresentationIndicatorType(data[1])
         screening_ind = ApiScreeningIndicatorType(data[2])
-        name_length = data[3]
-        name = bytes(data[4 : 4 + name_length]).decode(
-            "ascii" if used_alphabet == ApiUsedAlphabetType.AUA_DECT else "utf-8"
-        )
-        new = cls(used_alphabet, presentation_ind, screening_ind, name)
-        new.data = data
-        return new
+        name = data[3:].decode("utf-8")
+        return cls(used_alphabet, presentation_ind, screening_ind, name)
 
     def __str__(self):
+        """
+        Create a string representation of calling party name information.
+
+        Returns:
+            str: String representation including all name attributes
+        """
         return (
             f"Name: {self.name}, "
-            f"PresentationInd: {ApiPresentationIndicatorType(self.presentation_ind).name}, "
-            f"ScreeningInd: {ApiScreeningIndicatorType(self.screening_ind).name}"
+            f"Alphabet: {ApiUsedAlphabetType(self.used_alphabet).name}, "
+            f"Presentation: {ApiPresentationIndicatorType(self.presentation_ind).name}, "
+            f"Screening: {ApiScreeningIndicatorType(self.screening_ind).name}"
         )

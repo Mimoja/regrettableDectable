@@ -9,29 +9,54 @@ from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
 
 class ApiPpResetReq(BaseCommand):
+    """
+    Request to reset the Portable Part (PP).
+    Initiates a software reset of the PP device.
+    """
 
     def __init__(self):
+        """Initialize reset request command."""
         self.Primitive = Commands.API_PP_RESET_REQ
 
 
 class ApiPpResetInd(BaseCommand):
+    """
+    Reset indication from the Portable Part (PP).
+    Indicates that a reset has occurred and provides the status.
+    """
 
     _fields_ = [
         ("Status", c_uint8),
     ]
 
     def __init__(self, status: int):
+        """
+        Initialize reset indication.
+
+        Args:
+            status (int): Status of the reset operation
+        """
         self.Primitive = Commands.API_PP_RESET_IND
         self.Status = status
 
 
 class ApiPpGetFwVersionReq(BaseCommand):
+    """
+    Request to get firmware version information.
+    Retrieves the current firmware version of the PP device.
+    """
 
     def __init__(self):
+        """Initialize firmware version request command."""
         self.Primitive = Commands.API_PP_GET_FW_VERSION_REQ
 
 
 class ApiPpGetFwVersionCfm(InfoElementCommand):
+    """
+    Confirmation of firmware version request.
+    Contains detailed firmware version information including version number,
+    link date, DECT type, and additional information elements.
+    """
 
     _fields_ = [
         ("VersionHex", c_uint32),
@@ -49,6 +74,16 @@ class ApiPpGetFwVersionCfm(InfoElementCommand):
         dect_type: int,
         info_element: bytes,
     ):
+        """
+        Initialize firmware version confirmation.
+
+        Args:
+            status (int): Status of the request
+            version_hex (int): Firmware version in hexadecimal format
+            link_date (bytes): Link date as 5 bytes
+            dect_type (int): Type of DECT device
+            info_element (bytes): Additional information elements
+        """
         self.Primitive = Commands.API_PP_GET_FW_VERSION_CFM
         self.Status = status
         self.VersionHex = version_hex
@@ -62,23 +97,45 @@ class ApiPpGetFwVersionCfm(InfoElementCommand):
 
 
 class ApiPpSetCradleStatusReq(BaseCommand):
+    """
+    Request to set cradle status.
+    Updates the current cradle status of the PP device.
+    """
 
     _fields_ = [
         ("ApiCradleStatus", c_uint8),  # Placeholder for ApiCradleStatusType
     ]
 
     def __init__(self, cradle_status: int):
+        """
+        Initialize cradle status request.
+
+        Args:
+            cradle_status (int): New cradle status to set
+        """
         self.Primitive = Commands.API_PP_SET_CRADLE_STATUS_REQ
         self.ApiCradleStatus = cradle_status
 
 
 class ApiPpCradleDetectReq(BaseCommand):
+    """
+    Request to detect cradle status.
+    Initiates detection of whether the PP is currently in its cradle.
+    """
 
     def __init__(self):
+        """Initialize cradle detection request command."""
         self.Primitive = Commands.API_PP_CRADLE_DETECT_REQ
 
 
 class ApiTimeDateCodeType(Structure):
+    """
+    Structure representing date and time information.
+    Used for storing and transmitting time-related data in DECT communications.
+
+    The time zone is expressed in quarters of an hour relative to GMT.
+    The first bit of the time zone represents the sign (0: positive, 1: negative).
+    """
     _pack_ = 1
     _fields_ = [
         ("Year", c_uint8),  # Year since 1900
@@ -111,6 +168,18 @@ class ApiTimeDateCodeType(Structure):
         second: int,
         time_zone: int,
     ):
+        """
+        Initialize time and date code structure.
+
+        Args:
+            year (int): Year since 1900
+            month (int): Month (1-12)
+            day (int): Day of month (1-31)
+            hour (int): Hour (0-23)
+            minute (int): Minute (0-59)
+            second (int): Second (0-59)
+            time_zone (int): Time zone offset in quarters of an hour
+        """
         self.Year = year
         self.Month = month
         self.Day = day
@@ -121,6 +190,10 @@ class ApiTimeDateCodeType(Structure):
 
 
 class ApiPpSetTimeReq(BaseCommand):
+    """
+    Request to set the time on the PP device.
+    Updates the current time and date settings.
+    """
 
     _fields_ = [
         ("Coding", c_uint8),  # Placeholder for ApiTimeDateCodingType
@@ -131,6 +204,14 @@ class ApiPpSetTimeReq(BaseCommand):
     def __init__(
         self, coding: int, interpretation: int, time_date_code: ApiTimeDateCodeType
     ):
+        """
+        Initialize time setting request.
+
+        Args:
+            coding (int): Time/date coding type
+            interpretation (int): Time/date interpretation type
+            time_date_code (ApiTimeDateCodeType): Time and date information
+        """
         self.Primitive = Commands.API_PP_SET_TIME_REQ
         self.Coding = coding
         self.Interpretation = interpretation
@@ -138,34 +219,53 @@ class ApiPpSetTimeReq(BaseCommand):
 
 
 class ApiPpGetTimeReq(BaseCommand):
+    """
+    Request to get the current time from the PP device.
+    Retrieves the current time and date settings.
+    """
 
     def __init__(self):
+        """Initialize time retrieval request command."""
         self.Primitive = Commands.API_PP_GET_TIME_REQ
 
 
 class ApiPpSyncTimeReq(BaseCommand):
+    """
+    Request to synchronize time with another terminal.
+    Initiates time synchronization with a specified terminal.
+    """
 
     _fields_ = [
         ("TerminalId", c_uint16),
     ]
 
     def __init__(self, terminal_id: int):
+        """
+        Initialize time synchronization request.
+
+        Args:
+            terminal_id (int): ID of the terminal to synchronize with
+        """
         self.Primitive = Commands.API_PP_SYNC_TIME_REQ
         self.TerminalId = terminal_id
 
-    API_PP_SET_TIME_REQ = 0x5207
-    API_PP_SET_TIME_CFM = 0x5208
-    API_PP_GET_TIME_REQ = 0x5209
-    API_PP_GET_TIME_CFM = 0x520A
-    API_PP_SYNC_TIME_REQ = 0x520B
-
 
 class ApiPpSetTimeCfm(BaseCommand):
+    """
+    Confirmation of time setting request.
+    Indicates the result of a time setting operation.
+    """
 
     _fields_ = [
         ("Status", c_uint8),
     ]
 
     def __init__(self, status: RsStatusType):
+        """
+        Initialize time setting confirmation.
+
+        Args:
+            status (RsStatusType): Status of the time setting operation
+        """
         self.Primitive = Commands.API_PP_SET_TIME_CFM
         self.Status = status

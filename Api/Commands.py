@@ -2,6 +2,17 @@ from enum import IntEnum
 
 
 class Commands(IntEnum):
+    """
+    Enumeration of all DECT API commands.
+    Defines command identifiers for various DECT operations including basic control,
+    mobility management, call control, audio, ULE, and system features.
+
+    The commands are grouped into categories:
+    - Basic/General: Basic system commands (0x0000-0x000B)
+    - Phoenix FP API: Fixed Part specific commands (0x4000-0x4FFF)
+    - Phoenix PP API: Portable Part specific commands (0x5000-0x5FFF)
+    - RTX EAP: Debug and test commands (0xF000-0xFFFF)
+    """
     # Basic / general
     DUMMY_DATA = 0x0000
     KEY_MESSAGE = 0x0001
@@ -847,6 +858,15 @@ class Commands(IntEnum):
 
 
 class PtCommand(IntEnum):
+    """
+    Enumeration of Production Test commands.
+    Defines command identifiers for various production testing operations including:
+    - System control and configuration
+    - RF testing and calibration
+    - Battery and power management
+    - DECT mode and modulation settings
+    - NVS (Non-Volatile Storage) operations
+    """
     PT_CMD_SET_TEST_MODE = 0x0001
     PT_CMD_GET_SW_VERSION = 0x0016
     PT_CMD_SW_RESET = 0x0028

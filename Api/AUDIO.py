@@ -7,6 +7,10 @@ from Api.Api import RsStatusType
 
 
 class ApiPcmFscFreqType(IntEnum):
+    """
+    Enumeration of PCM Frame Sync (FSC) frequencies.
+    Defines supported frequencies for PCM synchronization.
+    """
     AP_FSC_FREQ_8KHZ = 0x00  # PCM FSC frequency is 8 KHz.
     AP_FSC_FREQ_16KHZ = 0x01  # PCM FSC frequency is 16 KHz.
     AP_FSC_FREQ_32KHZ = 0x02  # PCM FSC frequency is 32 KHz.
@@ -14,6 +18,10 @@ class ApiPcmFscFreqType(IntEnum):
 
 
 class ApiPcmFscLengthType(IntEnum):
+    """
+    Enumeration of PCM Frame Sync (FSC) pulse lengths.
+    Defines different FSC pulse lengths for master and slave modes.
+    """
     # The length of PCM FSC pulse is equal to 1 data bit. (Master)
     AP_FSC_LENGTH_1 = 0x00
     # The length of PCM FSC pulse is equal to 8 data bits. (Master)
@@ -31,6 +39,10 @@ class ApiPcmFscLengthType(IntEnum):
 
 
 class ApiPcmClkType(IntEnum):
+    """
+    Enumeration of PCM clock frequencies.
+    Defines supported clock frequencies for PCM interface.
+    """
     AP_PCM_CLK_1152 = 0x00  # 1.152 MHz
     AP_PCM_CLK_2304 = 0x01  # 2.304 MHz
     AP_PCM_CLK_4608 = 0x02  # 4.608 MHz
@@ -38,6 +50,11 @@ class ApiPcmClkType(IntEnum):
 
 
 class ApiPpAudioInitPcmReq(BaseCommand):
+    """
+    Command to initialize PCM audio interface.
+    Configures PCM parameters including master/slave mode, clock settings, and timing.
+    """
+
     _fields_ = [
         # Controls whether the device is master or slave on the PCM interface.
         ("PcmEnable", c_uint8),
@@ -80,6 +97,24 @@ class ApiPpAudioInitPcmReq(BaseCommand):
         PcmDoutIsOpenDrain,
         PcmIsOpenDrain,
     ):
+        """
+        Initialize PCM audio interface configuration.
+
+        Args:
+            PcmEnable: Enable/disable PCM interface
+            IsMaster: Set device as master (1) or slave (0)
+            Reserved: Reserved field, must be 0
+            PcmFscFreq (ApiPcmFscFreqType): Frame sync frequency
+            PcmFscLength (ApiPcmFscLengthType): Frame sync pulse length
+            PcmFscStartAligned: Frame sync alignment with data
+            PcmClk (ApiPcmClkType): PCM clock frequency
+            PcmClkOnRising: Clock edge selection for data
+            PcmClksPerBit: Clock cycles per data bit
+            PcmFscInvert: Invert frame sync signal
+            PcmCh0Delay: Channel 0 data delay
+            PcmDoutIsOpenDrain: PCM_DOUT pin configuration
+            PcmIsOpenDrain: PCM interface I/O mode
+        """
         self.Primitive = Commands.API_PP_AUDIO_INIT_PCM_REQ
         self.PcmEnable = PcmEnable
         self.IsMaster = IsMaster
@@ -97,18 +132,32 @@ class ApiPpAudioInitPcmReq(BaseCommand):
 
 
 class ApiPpAudioInitPcmCfm(BaseCommand):
+    """
+    Confirmation response for PCM audio initialization.
+    Contains the status of the initialization request.
+    """
+
     _fields_ = [
         # Controls whether the device is master or slave on the PCM interface.
         ("Status", c_uint8)
     ]
 
     def __init__(self, status: RsStatusType):
+        """
+        Initialize PCM initialization confirmation.
+
+        Args:
+            status (RsStatusType): Status of the initialization request
+        """
         self.Primitive = Commands.API_PP_AUDIO_MUTE_REQ
         self.Status = status
 
 
 class ApiPpAudioModeType(IntEnum):
-
+    """
+    Enumeration of audio output modes.
+    Defines different audio routing options and configurations.
+    """
     API_AUDIO_MODE_EARPIECE = 0x00  # PP Audio output through the earpiece
     API_AUDIO_MODE_HEADSET = 0x01  # PP Audio output through the earpiece
     API_AUDIO_MODE_HANDSFREE = (
@@ -130,50 +179,102 @@ class ApiPpAudioModeType(IntEnum):
 
 
 class ApiPpAudioOpenReq(BaseCommand):
+    """
+    Command to open an audio channel.
+    Specifies the audio output mode to be used.
+    """
+
     _fields_ = [("Mode", c_uint8)]
 
     def __init__(self, mode: ApiPpAudioModeType):
+        """
+        Initialize audio open request.
+
+        Args:
+            mode (ApiPpAudioModeType): Audio output mode to use
+        """
         self.Primitive = Commands.API_PP_AUDIO_OPEN_REQ
         self.Mode = mode
 
 
 class ApiPpAudioCloseReq(BaseCommand):
+    """
+    Command to close the currently open audio channel.
+    """
 
     def __init__(self):
+        """Initialize audio close request."""
         self.Primitive = Commands.API_PP_AUDIO_CLOSE_REQ
 
 
 class ApiPpAudioSetVolumeReq(BaseCommand):
+    """
+    Command to set audio volume.
+    Controls the volume level of the audio output.
+    """
+
     _fields_ = [("Volume", c_uint8)]
 
     def __init__(self, volume: int):
+        """
+        Initialize volume setting request.
+
+        Args:
+            volume (int): Volume level to set
+        """
         self.Primitive = Commands.API_PP_AUDIO_SET_VOLUME_REQ
         self.Volume = volume
 
 
 class ApiPpAudioMuteRxTxType(IntEnum):
+    """
+    Enumeration of audio mute options.
+    Defines which audio paths can be muted (receive, transmit, or both).
+    """
     API_MUTE_RX = 0x01  # Mute audio direction RX (Speaker)
     API_MUTE_TX = 0x02  # Mute audio direction TX (Microphone)
     API_MUTE_BOTH = 0x03  # Mute both audio directions RX and TX (Speaker and Mic)
 
 
 class ApiPpAudioMuteReq(BaseCommand):
+    """
+    Command to mute audio paths.
+    Allows muting of receive (speaker) and/or transmit (microphone) paths.
+    """
+
     _fields_ = [
         # Controls whether the device is master or slave on the PCM interface.
         ("muteRxTx", c_uint8)
     ]
 
     def __init__(self, muteRxTx: ApiPpAudioMuteRxTxType):
+        """
+        Initialize audio mute request.
+
+        Args:
+            muteRxTx (ApiPpAudioMuteRxTxType): Which audio paths to mute
+        """
         self.Primitive = Commands.API_PP_AUDIO_MUTE_REQ
         self.muteRxTx = muteRxTx
 
 
 class ApiPpAudioUnmuteReq(BaseCommand):
+    """
+    Command to unmute audio paths.
+    Allows unmuting of previously muted receive and/or transmit paths.
+    """
+
     _fields_ = [
         # Controls whether the device is master or slave on the PCM interface.
         ("muteRxTx", c_uint8)
     ]
 
     def __init__(self, muteRxTx: ApiPpAudioMuteRxTxType):
+        """
+        Initialize audio unmute request.
+
+        Args:
+            muteRxTx (ApiPpAudioMuteRxTxType): Which audio paths to unmute
+        """
         self.Primitive = Commands.API_PP_AUDIO_UNMUTE_REQ
         self.muteRxTx = muteRxTx

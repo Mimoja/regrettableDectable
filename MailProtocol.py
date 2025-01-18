@@ -11,7 +11,24 @@ logger = logging.getLogger("MailProtocol")
 
 
 class MailProtocol(asyncio.Protocol):
+    """
+    Implementation of the DECT Mail Protocol over serial communication.
+    Handles frame-based communication with sequence numbers and acknowledgments.
+
+    This protocol implements:
+    - Information frames for data transfer
+    - Supervisory frames for flow control
+    - SABM (Set Asynchronous Balanced Mode) for connection establishment
+    - Automatic retransmission of unacknowledged frames
+    """
+
     def __init__(self, onMessage):
+        """
+        Initialize the Mail Protocol.
+
+        Args:
+            onMessage: Callback function to handle received messages
+        """
         self.transport = None
         self.tx_seq = 0  # Transmit sequence number
         self.rx_seq = 0  # Receive sequence number
@@ -25,18 +42,46 @@ class MailProtocol(asyncio.Protocol):
         self.message_queue: List[Tuple[bytes, bool]] = []
 
     def connection_made(self, transport):
+        """
+        Called when a connection is established.
+
+        Args:
+            transport: The transport instance for the connection
+        """
         self.transport = transport
         logger.info("Connection established.")
 
     def data_received(self, data):
+        """
+        Called when data is received from the transport.
+
+        Args:
+            data (bytes): Received data
+        """
         logger.debug(f"Data received: {hexdump(data)}")
         self.handle_frame(data)
 
     def connection_lost(self, exc):
+        """
+        Called when the connection is lost or closed.
+
+        Args:
+            exc: The exception causing the connection loss, if any
+        """
         logger.info("Connection lost.")
         asyncio.get_event_loop().stop()
 
     def send_sabm(self, pf=True):
+        """
+        Send a SABM (Set Asynchronous Balanced Mode) frame.
+        Used for connection establishment and reset.
+
+        Args:
+            pf (bool): Poll/Final bit value
+
+        Returns:
+            asyncio.Event: Event that will be set when SABM acknowledgment is received
+        """
         self.wait_for_sabm = asyncio.Event()
         header = 0xC8 if pf else 0xC0
         frame = bytes([0x10, 0x00, 0x01, header, header])
@@ -48,6 +93,10 @@ class MailProtocol(asyncio.Protocol):
         return self.wait_for_sabm
 
     def flush_message_queue(self):
+        """
+        Process queued messages that are waiting to be sent.
+        Messages are sent if there's room in the outstanding frames window.
+        """
         if not self.message_queue:
             return
         now = time.time()
@@ -70,6 +119,13 @@ class MailProtocol(asyncio.Protocol):
             self._actually_send_information_frame(payload, pf)
 
     def send_information_frame(self, payload: bytes, pf=True):
+        """
+        Queue an information frame for transmission.
+
+        Args:
+            payload (bytes): Data to be sent
+            pf (bool): Poll/Final bit value
+        """
         if len(self.outstanding_frames) >= self.max_outstanding:
             logger.info(
                 f"Queueing message"
@@ -82,6 +138,13 @@ class MailProtocol(asyncio.Protocol):
             self._actually_send_information_frame(payload, pf)
 
     def _actually_send_information_frame(self, payload: bytes, pf=True):
+        """
+        Internal method to send an information frame immediately.
+
+        Args:
+            payload (bytes): Data to be sent
+            pf (bool): Poll/Final bit value
+        """
         header = self.tx_seq << 4 | self.rx_seq
         if pf:
             header |= 0x08
@@ -97,6 +160,13 @@ class MailProtocol(asyncio.Protocol):
         )
 
     def send_supervisory_frame(self, su_id: int, pf=True):
+        """
+        Send a supervisory frame (RR, REJ, RNR).
+
+        Args:
+            su_id (int): Supervisory frame type identifier
+            pf (bool): Poll/Final bit value
+        """
         header = 0x80 | (su_id << 4) | self.rx_seq
         if pf:
             header |= 0x08
@@ -104,6 +174,14 @@ class MailProtocol(asyncio.Protocol):
         self.transport.write(frame)
 
     def send(self, command: BaseCommand, program_id=0, task_id=1):
+        """
+        Send a command using the mail protocol.
+
+        Args:
+            command (BaseCommand): Command to send
+            program_id (int): Program identifier
+            task_id (int): Task identifier
+        """
         command_bytes = command.to_bytes()
         payload = bytes([program_id, task_id, *command_bytes])
         self.send_information_frame(payload, pf=True)
@@ -119,6 +197,15 @@ class MailProtocol(asyncio.Protocol):
         primitive: int,
         params: bytes,
     ):
+        """
+        Send a raw command using the mail protocol.
+
+        Args:
+            program_id (int): Program identifier
+            task_id (int): Task identifier
+            primitive (int): Command primitive identifier
+            params (bytes): Command parameters
+        """
         primitive_high = (primitive >> 8) & 0xFF
         primitive_low = primitive & 0xFF
         payload = bytes([program_id, task_id, primitive_low, primitive_high, *params])
@@ -129,6 +216,13 @@ class MailProtocol(asyncio.Protocol):
         )
 
     def handle_frame(self, data):
+        """
+        Process received frame data.
+        Handles information frames, supervisory frames, and SABM frames.
+
+        Args:
+            data (bytes): Received frame data
+        """
         self.temp_buffer += data
 
         if len(self.temp_buffer) == 0:
@@ -250,6 +344,9 @@ class MailProtocol(asyncio.Protocol):
                 self.temp_buffer = b""
 
     def resend_outstanding_frames(self):
+        """
+        Retransmit all unacknowledged frames in the outstanding frames queue.
+        """
         if not self.outstanding_frames:
             return
         logger.debug("Resending outstanding frames.")
@@ -258,6 +355,10 @@ class MailProtocol(asyncio.Protocol):
             self.transport.write(frame)
 
     async def poll_timer(self):
+        """
+        Timer coroutine to handle frame acknowledgment timeouts.
+        Triggers retransmission of unacknowledged frames.
+        """
         while True:
             now = time.time()
             expired_timers = [

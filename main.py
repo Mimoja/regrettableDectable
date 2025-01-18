@@ -84,12 +84,24 @@ from EepromDefinitions import EepromDef
 
 
 async def reset_pp(dct: DECT):
+    """
+    Reset the Portable Part (PP) of the DECT device.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     print(colored("Resetting PP...", "yellow"))
     await dct.command(ApiPpResetReq(), timeout=20)
     print(colored("PP reset", "green"))
 
 
 async def reset_nv_storage(dct: DECT):
+    """
+    Reset the Non-Volatile Storage (NVS) of the DECT device to default values.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     print(colored("Resetting NV Storage...", "yellow"))
     await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
     await dct.command(ApiPpResetReq(), timeout=20)
@@ -97,6 +109,13 @@ async def reset_nv_storage(dct: DECT):
 
 
 async def ensure_pp_mode(dct: DECT):
+    """
+    Ensure the DECT device is in Portable Part (PP) mode.
+    If in Fixed Part (FP) mode, switches to PP mode.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
     pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2, timeout=2)
 
@@ -123,6 +142,13 @@ async def ensure_pp_mode(dct: DECT):
 
 
 async def set_dect_mode(dct: DECT):
+    """
+    Set the DECT mode to EU (European) mode.
+    If not in EU mode, configures the device and performs necessary reset.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     print(
         colored(
             "Requesting Dect mode (API_PROD_TEST_REQ :: PT_CMD_GET_DECT_MODE)", "yellow"
@@ -167,6 +193,16 @@ async def set_dect_mode(dct: DECT):
 
 
 async def lock(dct: DECT, request_lock=False):
+    """
+    Lock or query the lock status of the DECT device.
+
+    Args:
+        dct (DECT): DECT device instance
+        request_lock (bool): If True, requests a lock. If False, only queries lock status.
+
+    Returns:
+        bool: True if device is locked, False if unlocked, None if operation failed
+    """
     if request_lock:
         print(colored("Requesting Lock...", "yellow"))
     else:
@@ -193,6 +229,13 @@ async def lock(dct: DECT, request_lock=False):
 
 
 async def list_images(dct: DECT):
+    """
+    List all firmware images stored in the DECT device.
+    Prints detailed information about each image including status, ID, and metadata.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     i = 0
     images = []
     while True:
@@ -237,6 +280,13 @@ async def list_images(dct: DECT):
 
 
 async def blink_led(dct: DECT, led: int):
+    """
+    Make a specific LED on the DECT device blink.
+
+    Args:
+        dct (DECT): DECT device instance
+        led (int): LED number to blink
+    """
     print(colored(f"Blinking the LED {led}...", "yellow"))
     await dct.command(
         ApiHalLedReq(
@@ -260,6 +310,16 @@ async def blink_led(dct: DECT, led: int):
 
 
 async def auto_register(dct: DECT):
+    """
+    Automatically register the DECT device with a base station.
+    Attempts registration with default access code.
+
+    Args:
+        dct (DECT): DECT device instance
+
+    Returns:
+        The registration status response
+    """
     print(colored("Auto registering", "yellow"))
 
     await dct.command(
@@ -304,6 +364,16 @@ async def auto_register(dct: DECT):
 
 
 async def manual_register(dct: DECT):
+    """
+    Manually register the DECT device with a base station.
+    Scans for base stations and attempts to connect to the first one found.
+
+    Args:
+        dct (DECT): DECT device instance
+
+    Returns:
+        The registration status response
+    """
     print(colored("Starting registration scan", "yellow"))
 
     await dct.command(
@@ -368,6 +438,16 @@ async def manual_register(dct: DECT):
 
 
 def parse_call(call: ApiCcSetupInd):
+    """
+    Parse an incoming call setup indication.
+    Extracts and prints call information including caller ID, service type, and codecs.
+
+    Args:
+        call (ApiCcSetupInd): The call setup indication to parse
+
+    Returns:
+        tuple: (codec info element, call object)
+    """
     print(colored("We are beeing called:", "yellow"))
     print(colored("Connection (E)ID:", "yellow"), call.ConEi)
     print(colored("Call Class:", "yellow"), ApiCcCallClassType(call.CallClass).name)
@@ -395,6 +475,16 @@ def parse_call(call: ApiCcSetupInd):
 
 
 async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
+    """
+    Read data from a specific EEPROM location.
+
+    Args:
+        dct (DECT): DECT device instance
+        target (EepromTypes.BaseNode): EEPROM target location to read
+
+    Returns:
+        The target object populated with read data, or None if read failed
+    """
     read_answer: ApiHalReadCfm = await dct.command(
         ApiHalReadReq(ApiHalAreaType.AHA_NVS, target.offset, target.length),
     )
@@ -406,6 +496,15 @@ async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
 
 
 async def known_fps(dct: DECT):
+    """
+    Check if there are any known Fixed Parts (base stations) stored in EEPROM.
+
+    Args:
+        dct (DECT): DECT device instance
+
+    Returns:
+        bool: True if known FPs exist, False otherwise
+    """
     for target in [
         EepromDef.EepromNotInRam.Subs0,
         EepromDef.EepromNotInRam.Subs1,
@@ -421,6 +520,13 @@ async def known_fps(dct: DECT):
 
 
 async def config_audio(dct: DECT):
+    """
+    Configure audio settings for the DECT device.
+    Sets up PCM parameters including clock, frequency, and alignment.
+
+    Args:
+        dct (DECT): DECT device instance
+    """
     print(colored("Configuring audio...", "yellow"))
 
     print(colored("Setting PCM...", "yellow"))
@@ -448,6 +554,13 @@ async def config_audio(dct: DECT):
 
 
 async def get_ipei(dct):
+    """
+    Get and print the International Portable Equipment Identity (IPEI).
+    Reads IPEI from EEPROM and formats it as manufacturer and device numbers.
+
+    Args:
+        dct: DECT device instance
+    """
     Ipei = await read_eeprom(dct, EepromDef.EepromInRam.Ipei)
     Ipei = Ipei.values
     man = ((Ipei[0] & 0x0F) << 12) + (Ipei[1] << 4) + ((Ipei[2] & 0xF0) >> 4)
@@ -456,6 +569,10 @@ async def get_ipei(dct):
 
 
 async def main():
+    """
+    Main function that initializes and runs the DECT device operation.
+    Sets up the device, handles registration, and manages incoming calls in a loop.
+    """
     logging.getLogger("DECT").setLevel(logging.INFO)
     logging.getLogger("MailProtocol").setLevel(logging.WARNING)
 
