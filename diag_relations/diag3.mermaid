@@ -1,0 +1,242 @@
+classDiagram
+     %% Base Classes
+     class BaseCommand {
+         +Primitive: int
+         +_raw_: bytes
+         +_last_field_original_end: int
+         +to_bytes() bytes
+         +set_array(entry, data)
+         +from_bytes(data) BaseCommand
+         +to_dict()
+         +parseDate(date) datetime
+         +primitive()
+     }
+
+     class VariableSizeCommand {
+         +data()
+         +data_bytes()
+         +from_bytes(data) VariableSizeCommand
+     }
+
+     class InfoElementCommand {
+         +infoElements()
+     }
+
+     %% Core Classes
+     class DECT {
+         +port: str
+         +baudrate: int
+         +connect()
+         +command()
+         +wait_for()
+     }
+
+     class MailProtocol {
+         +onMessage: function
+         +send_sabm(pf)
+         +flush_message_queue()
+         +send_information_frame(payload, pf)
+         +send_supervisory_frame(su_id, pf)
+         +send(command, program_id, task_id)
+         +handle_frame(data)
+         +resend_outstanding_frames()
+     }
+
+     %% Command Classes - HAL
+     class ApiHalLedReq {
+         +LedNr: uint8
+         +CmdCount: uint8
+         +Commands: ApiHalLedCmdType[]
+     }
+
+     class ApiHalReadReq {
+         +Area: uint8
+         +Address: uint32
+         +Length: uint16
+     }
+
+     class ApiHalWriteReq {
+         +Area: uint8
+         +Address: uint32
+         +Length: uint16
+         +Data: uint8[]
+     }
+
+     %% Command Classes - CC (Call Control)
+     class ApiCcSetupInd {
+         +ConEi: uint16
+         +BasicService: uint8
+         +CallClass: uint8
+         +Signal: uint8
+         +InfoElementLength: uint16
+         +InfoElement: uint8[]
+     }
+
+     class ApiCcConnectReq {
+         +ConEi: uint16
+         +InfoElementLength: uint16
+         +InfoElement: uint8[]
+     }
+
+     class ApiCcAlertReq {
+         +ConEi: uint16
+         +InfoElementLength: uint16
+         +InfoElement: uint8[]
+     }
+
+     %% Command Classes - MM (Mobility Management)
+     class ApiPpMmRegistrationSearchInd {
+         +Rfpi: uint8[5]
+         +FpCapBit24_31: uint8
+         +FpCapBit32_39: uint8
+         +FpCapBit40_47: uint8
+         +caps()
+     }
+
+     class ApiPpMmRegistrationAutoReq {
+         +SearchMode: uint8
+         +AccessCode: uint8[4]
+     }
+
+     class ApiPpMmLockReq {
+         +SubscriptionNo: uint8
+     }
+
+     %% Command Classes - Audio
+     class ApiPpAudioInitPcmReq {
+         +PcmEnable: uint8
+         +IsMaster: uint8
+         +PcmFscFreq: ApiPcmFscFreqType
+         +PcmFscLength: ApiPcmFscLengthType
+         +PcmClk: ApiPcmClkType
+     }
+
+     class ApiPpAudioOpenReq {
+         +Mode: ApiPpAudioModeType
+     }
+
+     class ApiPpAudioSetVolumeReq {
+         +Volume: uint8
+     }
+
+     %% Command Classes - Image
+     class ApiImageInfoReq {
+         +ImageIndex: uint8
+     }
+
+     class ApiImageActivateReq {
+         +ImageIndex: uint8
+         +ActivateCola: uint8
+     }
+
+     %% Info Element Classes
+     class InfoElement {
+         +type: int
+         +data: bytes
+         +to_bytes()
+     }
+
+     class ApiCodecListType {
+         +negotiation_indicator: ApiNegotiationIndicatorType
+         +codecs: ApiCodecInfoType[]
+     }
+
+     class ApiCallingPartyNumber {
+         +number_type: ApiNumberTypeType
+         +npi: ApiNpiType
+         +presentation_ind: ApiPresentationIndicatorType
+         +screening_ind: ApiScreeningIndicatorType
+         +number: str
+     }
+
+     class ApiCallingPartyName {
+         +used_alphabet: ApiUsedAlphabetType
+         +presentation_ind: ApiPresentationIndicatorType
+         +screening_ind: ApiScreeningIndicatorType
+         +name: str
+     }
+
+     %% Key Enums
+     class Commands {
+         <<enumeration>>
+         +API_CC_SETUP_REQ
+         +API_PP_AUDIO_INIT_PCM_REQ
+         +API_HAL_LED_REQ
+         +etc...
+     }
+
+     class RsStatusType {
+         <<enumeration>>
+         +RSS_SUCCESS
+         +RSS_NOT_SUPPORTED
+         +RSS_FAILED
+         +etc...
+     }
+
+     class ApiPcmFscFreqType {
+         <<enumeration>>
+         +AP_FSC_FREQ_8KHZ
+         +AP_FSC_FREQ_16KHZ
+         +AP_FSC_FREQ_32KHZ
+     }
+
+     class ApiPpAudioModeType {
+         <<enumeration>>
+         +API_AUDIO_MODE_EARPIECE
+         +API_AUDIO_MODE_HEADSET
+         +API_AUDIO_MODE_HANDSFREE
+     }
+
+     %% Relationships
+     BaseCommand <|-- VariableSizeCommand
+     VariableSizeCommand <|-- InfoElementCommand
+
+     %% HAL Commands
+     BaseCommand <|-- ApiHalLedReq
+     BaseCommand <|-- ApiHalReadReq
+     BaseCommand <|-- ApiHalWriteReq
+
+     %% CC Commands
+     InfoElementCommand <|-- ApiCcSetupInd
+     InfoElementCommand <|-- ApiCcConnectReq
+     InfoElementCommand <|-- ApiCcAlertReq
+
+     %% MM Commands
+     BaseCommand <|-- ApiPpMmRegistrationSearchInd
+     BaseCommand <|-- ApiPpMmRegistrationAutoReq
+     BaseCommand <|-- ApiPpMmLockReq
+
+     %% Audio Commands
+     BaseCommand <|-- ApiPpAudioInitPcmReq
+     BaseCommand <|-- ApiPpAudioOpenReq
+     BaseCommand <|-- ApiPpAudioSetVolumeReq
+
+     %% Image Commands
+     BaseCommand <|-- ApiImageInfoReq
+     BaseCommand <|-- ApiImageActivateReq
+
+     %% Info Elements
+     InfoElement <|-- ApiCodecListType
+     InfoElement <|-- ApiCallingPartyNumber
+     InfoElement <|-- ApiCallingPartyName
+
+     %% Core Class Relationships
+     DECT --> MailProtocol
+     DECT --> BaseCommand
+     MailProtocol --> Commands
+
+     %% Command Dependencies
+     ApiHalLedReq --> Commands
+     ApiCcSetupInd --> Commands
+     ApiPpAudioInitPcmReq --> Commands
+     ApiImageInfoReq --> Commands
+
+     %% Info Element Dependencies
+     ApiCcSetupInd --> InfoElement
+     ApiCodecListType --> InfoElement
+
+     %% Enum Dependencies
+     ApiPpAudioInitPcmReq --> ApiPcmFscFreqType
+     ApiPpAudioOpenReq --> ApiPpAudioModeType
+     ApiCallingPartyNumber --> ApiNumberTypeType
+     ApiCallingPartyNumber --> ApiNpiType

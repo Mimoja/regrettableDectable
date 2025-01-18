@@ -1,0 +1,124 @@
+classDiagram
+     %% Base Classes
+     class BaseCommand {
+         +Primitive: int
+         +to_bytes() bytes
+         +set_array(entry, data)
+         +from_bytes(data) BaseCommand
+         +to_dict()
+         +parseDate(date) datetime
+     }
+
+     class VariableSizeCommand {
+         +data()
+         +data_bytes()
+         +from_bytes(data) VariableSizeCommand
+     }
+
+     class InfoElementCommand {
+         +infoElements()
+     }
+
+     %% Core Classes
+     class DECT {
+         +port: str
+         +baudrate: int
+         +connect()
+         +command()
+         +wait_for()
+     }
+
+     class MailProtocol {
+         +send_sabm()
+         +send_information_frame()
+         +send_supervisory_frame()
+         +handle_frame()
+     }
+
+     %% Command Classes
+     class ApiHalLedReq {
+         +LedNr: uint8
+         +CmdCount: uint8
+         +Commands: ApiHalLedCmdType[]
+     }
+
+     class ApiCcSetupInd {
+         +ConEi: uint16
+         +BasicService: uint8
+         +CallClass: uint8
+         +Signal: uint8
+     }
+
+     class ApiPpMmRegistrationSearchInd {
+         +Rfpi: uint8[5]
+         +FpCapBit24_31: uint8
+         +caps()
+     }
+
+     class ApiImageInfoReq {
+         +ImageIndex: uint8
+     }
+
+     class ApiPpAudioInitPcmReq {
+         +PcmEnable: uint8
+         +IsMaster: uint8
+         +PcmFscFreq: ApiPcmFscFreqType
+     }
+
+     %% Info Element Classes
+     class InfoElement {
+         +type: int
+         +data: bytes
+         +to_bytes()
+     }
+
+     class ApiCodecListType {
+         +negotiation_indicator: ApiNegotiationIndicatorType
+         +codecs: ApiCodecInfoType[]
+     }
+
+     class ApiCallingPartyNumber {
+         +number_type: ApiNumberTypeType
+         +npi: ApiNpiType
+         +number: str
+     }
+
+     %% Key Enums
+     class Commands {
+         <<enumeration>>
+         +API_CC_SETUP_REQ
+         +API_PP_AUDIO_INIT_PCM_REQ
+         +API_HAL_LED_REQ
+         +etc...
+     }
+
+     class RsStatusType {
+         <<enumeration>>
+         +RSS_SUCCESS
+         +RSS_NOT_SUPPORTED
+         +RSS_FAILED
+     }
+
+     %% Relationships
+     BaseCommand <|-- VariableSizeCommand
+     VariableSizeCommand <|-- InfoElementCommand
+     BaseCommand <|-- ApiHalLedReq
+     BaseCommand <|-- ApiPpAudioInitPcmReq
+     InfoElementCommand <|-- ApiCcSetupInd
+     BaseCommand <|-- ApiImageInfoReq
+     BaseCommand <|-- ApiPpMmRegistrationSearchInd
+
+     InfoElement <|-- ApiCodecListType
+     InfoElement <|-- ApiCallingPartyNumber
+
+     DECT --> MailProtocol
+     DECT --> BaseCommand
+     MailProtocol --> Commands
+
+     ApiHalLedReq --> Commands
+     ApiCcSetupInd --> Commands
+     ApiPpAudioInitPcmReq --> Commands
+     ApiImageInfoReq --> Commands
+
+     ApiCcSetupInd --> InfoElement
+     ApiCodecListType --> InfoElement

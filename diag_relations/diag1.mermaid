@@ -1,0 +1,95 @@
+classDiagram
+     class BaseCommand {
+         +Primitive: int
+         +to_bytes() bytes
+         +set_array(entry, data)
+         +from_bytes(data) BaseCommand
+         +to_dict()
+         +parseDate(date) datetime
+     }
+
+     class VariableSizeCommand {
+         +data()
+         +data_bytes()
+         +from_bytes(data) VariableSizeCommand
+     }
+
+     class InfoElementCommand {
+         +infoElements()
+     }
+
+     class ApiPpAudioInitPcmReq {
+         +PcmEnable: uint8
+         +IsMaster: uint8
+         +PcmFscFreq: ApiPcmFscFreqType
+         +PcmClk: ApiPcmClkType
+     }
+
+     class ApiPpAudioInitPcmCfm {
+         +Status: RsStatusType
+     }
+
+     class ApiPpAudioOpenReq {
+         +Mode: ApiPpAudioModeType
+     }
+
+     class ApiPpAudioCloseReq
+
+     class ApiPpAudioSetVolumeReq {
+         +Volume: uint8
+     }
+
+     class ApiPpAudioMuteReq {
+         +muteRxTx: ApiPpAudioMuteRxTxType
+     }
+
+     class ApiPpAudioUnmuteReq {
+         +muteRxTx: ApiPpAudioMuteRxTxType
+     }
+
+     %% Enums
+     class ApiPcmFscFreqType {
+         <<enumeration>>
+         AP_FSC_FREQ_8KHZ
+         AP_FSC_FREQ_16KHZ
+         AP_FSC_FREQ_32KHZ
+     }
+
+     class ApiPcmClkType {
+         <<enumeration>>
+         AP_PCM_CLK_1152
+         AP_PCM_CLK_2304
+         AP_PCM_CLK_4608
+     }
+
+     class ApiPpAudioModeType {
+         <<enumeration>>
+         API_AUDIO_MODE_EARPIECE
+         API_AUDIO_MODE_HEADSET
+         API_AUDIO_MODE_HANDSFREE
+     }
+
+     class ApiPpAudioMuteRxTxType {
+         <<enumeration>>
+         API_MUTE_RX
+         API_MUTE_TX
+         API_MUTE_BOTH
+     }
+
+     %% Inheritance relationships
+     BaseCommand <|-- VariableSizeCommand
+     VariableSizeCommand <|-- InfoElementCommand
+     BaseCommand <|-- ApiPpAudioInitPcmReq
+     BaseCommand <|-- ApiPpAudioInitPcmCfm
+     BaseCommand <|-- ApiPpAudioOpenReq
+     BaseCommand <|-- ApiPpAudioCloseReq
+     BaseCommand <|-- ApiPpAudioSetVolumeReq
+     BaseCommand <|-- ApiPpAudioMuteReq
+     BaseCommand <|-- ApiPpAudioUnmuteReq
+
+     %% Associations
+     ApiPpAudioInitPcmReq --> ApiPcmFscFreqType
+     ApiPpAudioInitPcmReq --> ApiPcmClkType
+     ApiPpAudioOpenReq --> ApiPpAudioModeType
+     ApiPpAudioMuteReq --> ApiPpAudioMuteRxTxType
+     ApiPpAudioUnmuteReq --> ApiPpAudioMuteRxTxType
