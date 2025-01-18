@@ -76,6 +76,7 @@ from Api.AUDIO import (
     ApiPpAudioUnmuteReq,
     ApiPcmFscFreqType,
     ApiPcmFscLengthType,
+    ApiPpAudioCloseReq,
     ApiPpAudioMuteRxTxType,
     ApiPpAudioSetVolumeReq,
 )
@@ -509,9 +510,9 @@ async def main():
     await asyncio.sleep(0.250)
     await blink_led(dct, 3)
 
-    print(colored("Waiting for incoming call...", "yellow"))
-
     while True:
+        print(colored("Waiting for incoming call...", "yellow"))
+
         call_resp: ApiCcSetupInd = await dct.wait_for(
             [
                 Commands.API_CC_SETUP_IND,
@@ -539,7 +540,7 @@ async def main():
 
         print(colored("Opening Audio...", "yellow"))
         await dct.command(
-            ApiPpAudioOpenReq(ApiPpAudioModeType.API_AUDIO_MODE_PCM0),
+            ApiPpAudioOpenReq(ApiPpAudioModeType.API_AUDIO_MODE_HEADSET),
             max_retries=1,
             timeout=0,
         )
@@ -558,17 +559,14 @@ async def main():
         connect = await dct.command(
             ApiCcConnectReq(call.ConEi, codecsIE.to_bytes()), max_retries=3, timeout=1
         )
-        print(colored("Call connected!", "green"), connect)
-        # print(colored("Unmuting", "yellow"))
+        print(colored("Unmuting", "yellow"))
 
-        # unmuted = await dct.command(
-        #     ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_TX),
-        #     max_retries=3,
-        #     timeout=1,
-        # )
-        # if unmuted:
-        #     print(colored("Unmuted", "green"))
-        #     break
+        await dct.command(
+            ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_TX),
+            max_retries=1,
+            timeout=0,
+        )
+        print(colored("Call connected!", "green"), connect)
 
         while True:
             call = await dct.wait_for(
@@ -595,6 +593,12 @@ async def main():
                 case Commands.API_CC_REJECT_IND:
                     print(colored("Call ended!", "magenta"), call)
                     break
+        print(colored("Closing Audio...", "yellow"))
+        await dct.command(
+            ApiPpAudioCloseReq(),
+            max_retries=1,
+            timeout=0,
+        )
 
     await asyncio.Future()
 

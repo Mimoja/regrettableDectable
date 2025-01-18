@@ -137,6 +137,12 @@ class ApiPpAudioOpenReq(BaseCommand):
         self.Mode = mode
 
 
+class ApiPpAudioCloseReq(BaseCommand):
+
+    def __init__(self):
+        self.Primitive = Commands.API_PP_AUDIO_CLOSE_REQ
+
+
 class ApiPpAudioSetVolumeReq(BaseCommand):
     _fields_ = [("Volume", c_uint8)]
 
