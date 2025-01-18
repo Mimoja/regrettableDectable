@@ -40,6 +40,7 @@ class ApiPcmClkType(IntEnum):
 class ApiPpAudioInitPcmReq(BaseCommand):
     _fields_ = [
         # Controls whether the device is master or slave on the PCM interface.
+        ("PcmEnable", c_uint8),
         ("IsMaster", c_uint8),
         ("Reserved", c_uint8),  # For further use. Must be set to 0.
         ("PcmFscFreq", c_uint8),  # PCM FSC frequency; 8,16, or 32kHz.
@@ -65,6 +66,7 @@ class ApiPpAudioInitPcmReq(BaseCommand):
 
     def __init__(
         self,
+        PcmEnable,
         IsMaster,
         Reserved,
         PcmFscFreq: ApiPcmFscFreqType,
@@ -79,6 +81,7 @@ class ApiPpAudioInitPcmReq(BaseCommand):
         PcmIsOpenDrain,
     ):
         self.Primitive = Commands.API_PP_AUDIO_INIT_PCM_REQ
+        self.PcmEnable = PcmEnable
         self.IsMaster = IsMaster
         self.Reserved = Reserved
         self.PcmFscFreq = PcmFscFreq

@@ -422,34 +422,28 @@ async def known_fps(dct: DECT):
 async def config_audio(dct: DECT):
     print(colored("Configuring audio...", "yellow"))
 
-    # print(colored("Setting PCM...", "yellow"))
-    # cmd = ApiPpAudioInitPcmReq(
-    #     IsMaster=1,
-    #     Reserved=0,
-    #     PcmFscFreq=ApiPcmFscFreqType.AP_FSC_FREQ_16KHZ,
-    #     PcmFscLength=0x03,
-    #     PcmFscStartAligned=0x01,
-    #     PcmClk=ApiPcmClkType.AP_PCM_CLK_4608,
-    #     PcmClkOnRising=0x01,
-    #     PcmClksPerBit=0x01,
-    #     PcmFscInvert=0,
-    #     PcmCh0Delay=0,
-    #     PcmDoutIsOpenDrain=0,
-    #     PcmIsOpenDrain=0,
-    # )
-    # print(hexdump(cmd.to_bytes()))
-    # pcm_init = await dct.command(cmd)
+    print(colored("Setting PCM...", "yellow"))
+    cmd = ApiPpAudioInitPcmReq(
+        PcmEnable=1,
+        IsMaster=1,
+        Reserved=0,
+        PcmFscFreq=ApiPcmFscFreqType.AP_FSC_FREQ_16KHZ,
+        PcmFscLength=0x03,
+        PcmFscStartAligned=0x01,
+        PcmClk=ApiPcmClkType.AP_PCM_CLK_4608,
+        PcmClkOnRising=0x01,
+        PcmClksPerBit=0x01,
+        PcmFscInvert=0,
+        PcmCh0Delay=0,
+        PcmDoutIsOpenDrain=0,
+        PcmIsOpenDrain=0,
+    )
+    pcm_init = await dct.command(cmd)
 
-    # if pcm_init.Status != RsStatusType.RSS_SUCCESS:
-    #     print(
-    #         colored(f"Failed to init PCM: {RsStatusType(pcm_init.Status).name}", "red")
-    #     )
-
-    print(colored("Setting Audio volume...", "yellow"))
-    await dct.command(ApiPpAudioSetVolumeReq(volume=0))
-
-    print(colored("Opening Audio...", "yellow"))
-    await dct.command(ApiPpAudioOpenReq(ApiPpAudioModeType.API_AUDIO_MODE_PCM0))
+    if pcm_init.Status != RsStatusType.RSS_SUCCESS:
+        print(
+            colored(f"Failed to init PCM: {RsStatusType(pcm_init.Status).name}", "red")
+        )
 
 
 async def get_ipei(dct):
@@ -509,6 +503,8 @@ async def main():
         print(colored("Registration successful!", "green"))
         print(colored("Status", "yellow"), status)
 
+    await config_audio(dct)
+
     await blink_led(dct, 2)
     await asyncio.sleep(0.250)
     await blink_led(dct, 3)
@@ -538,6 +534,16 @@ async def main():
             print(colored("Using G722 codec", "yellow"))
             print(colored("Codecs:", "yellow"), codecsIE)
 
+        # print(colored("Setting Audio volume...", "yellow"))
+        # await dct.command(ApiPpAudioSetVolumeReq(volume=0))
+
+        print(colored("Opening Audio...", "yellow"))
+        await dct.command(
+            ApiPpAudioOpenReq(ApiPpAudioModeType.API_AUDIO_MODE_PCM0),
+            max_retries=1,
+            timeout=0,
+        )
+
         print(colored("Sending Alert status...", "yellow"))
         await dct.command(ApiCcAlertReq(call.ConEi, bytes()), max_retries=1, timeout=0)
 
@@ -553,16 +559,16 @@ async def main():
             ApiCcConnectReq(call.ConEi, codecsIE.to_bytes()), max_retries=3, timeout=1
         )
         print(colored("Call connected!", "green"), connect)
-        print(colored("Unmuting", "yellow"))
+        # print(colored("Unmuting", "yellow"))
 
-        unmuted = await dct.command(
-            ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_TX),
-            max_retries=100,
-            timeout=1,
-        )
-        if unmuted:
-            print(colored("Unmuted", "green"))
-            break
+        # unmuted = await dct.command(
+        #     ApiPpAudioUnmuteReq(muteRxTx=ApiPpAudioMuteRxTxType.API_MUTE_TX),
+        #     max_retries=3,
+        #     timeout=1,
+        # )
+        # if unmuted:
+        #     print(colored("Unmuted", "green"))
+        #     break
 
         while True:
             call = await dct.wait_for(
