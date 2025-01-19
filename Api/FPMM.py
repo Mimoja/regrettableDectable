@@ -11,6 +11,14 @@ from .Commands import Commands
 
 
 class ApiMmRejectReasonType(IntEnum):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Enumeration of mobility management rejection reasons.
+    Defines various reasons why registration or connection attempts may be rejected.
+    """
     MM_REJ_NO_REJECT_REASON = 0x00
     MM_REJ_TPUI_UNKNOWN = 0x01
     MM_REJ_IPUI_UNKNOWN = 0x02

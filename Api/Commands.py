@@ -3,6 +3,10 @@ from enum import IntEnum
 
 class Commands(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of all DECT API commands.
     Defines command identifiers for various DECT operations including basic control,
     mobility management, call control, audio, ULE, and system features.

@@ -8,6 +8,10 @@ from Api.Api import RsStatusType
 
 class ApiCcBasicServiceType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of basic service types for DECT calls.
     Defines different types of voice and data services.
     """

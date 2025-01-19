@@ -77,6 +77,14 @@ class ApiFpCradleDetectReq(BaseCommand):
 
 
 class ApiTimeDateCodeType(Structure):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Structure for time and date information.
+    Contains fields for year, month, day, hour, minute, second and timezone.
+    """
     _pack_ = 1
     _fields_ = [
         ("Year", c_uint8),  # Year since 1900

@@ -127,8 +127,6 @@ def parseMail(primitive, params):
             return ApiPpMmLockedInd.from_bytes(payload)
         case Commands.API_PP_MM_UNLOCKED_IND:
             return ApiPpMmUnlockedInd.from_bytes(payload)
-
-        # """CC Commands"""
         case Commands.API_CC_SETUP_IND:
             return ApiCcSetupInd.from_bytes(payload)
         case Commands.API_CC_RELEASE_IND:

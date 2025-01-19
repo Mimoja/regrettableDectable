@@ -9,6 +9,14 @@ from .Api import BaseCommand, RsStatusType, VariableSizeCommand
 
 
 class ApiImageID(IntEnum):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Enumeration of image identifiers.
+    Defines different types of firmware images that can be managed.
+    """
     SYSTEM = 1 << 0
     COLA = 1 << 1
     FP = 1 << 2

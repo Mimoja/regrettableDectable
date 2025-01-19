@@ -85,6 +85,10 @@ from EepromDefinitions import EepromDef
 
 async def reset_pp(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Reset the Portable Part (PP) of the DECT device.
 
     Args:
@@ -97,6 +101,10 @@ async def reset_pp(dct: DECT):
 
 async def reset_nv_storage(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Reset the Non-Volatile Storage (NVS) of the DECT device to default values.
 
     Args:

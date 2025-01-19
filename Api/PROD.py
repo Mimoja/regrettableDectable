@@ -5,6 +5,14 @@ from enum import IntEnum
 
 
 class DectMode(IntEnum):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Enumeration of DECT operating modes.
+    Defines different regional and operational modes for DECT devices.
+    """
     EU = 0
     US = 1
     SA = 2

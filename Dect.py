@@ -14,32 +14,37 @@ logger = logging.getLogger("DECT")
 
 
 class DECT:
-    """
+    """ 
     Main DECT request-response framework.
     Handles communication with DECT devices over serial connection.
-    """
+    """ 
+
 
     def __init__(self, port, baudrate):
-        """
+        """ 
+
         Initialize a new DECT connection.
 
         Args:
             port (str): Serial port to connect to
             baudrate (int): Baud rate for serial communication
-        """
+        """ 
+
         self.port = port
         self.baudrate = baudrate
         self.pending_requests = {}
         self.protocol = None
 
     async def connect(self):
-        """
+        """ 
+
         Establish the serial connection and initialize the protocol.
         Attempts to synchronize SABM (Set Asynchronous Balanced Mode) with retries.
 
         Raises:
             asyncio.TimeoutError: If SABM synchronization fails repeatedly
-        """
+        """ 
+
         logger.info(f"Connecting to {self.port} at {self.baudrate} baud...")
         loop = asyncio.get_running_loop()
         transport, protocol = await serial_asyncio.create_serial_connection(
@@ -61,7 +66,9 @@ class DECT:
     async def command(
         self, command: BaseCommand, program_id=0, task_id=1, max_retries=3, timeout=5
     ):
-        """
+        """ 
+
+
         Send a command to the DECT device and wait for response.
 
         Args:
@@ -73,7 +80,8 @@ class DECT:
 
         Returns:
             The command response if successful, None if timed out
-        """
+        """ 
+
         event = asyncio.Event()
         primitive = command.primitive()
         self.pending_requests[primitive] = {"event": event, "response": None}
@@ -103,14 +111,16 @@ class DECT:
                     return None
 
     def received(self, primitive, params):
-        """
+        """ 
+
         Handle received DECT responses.
         Matches responses with pending requests and processes them.
 
         Args:
             primitive: The primitive type of the response
             params: Parameters received with the response
-        """
+        """ 
+
         response = parseMail(primitive, params)
         if not response:
             logger.warning(
@@ -139,7 +149,8 @@ class DECT:
             )
 
     async def wait_for(self, primitive, timeout=5):
-        """
+        """ 
+
         Wait for a specific primitive or list of primitives to be received.
 
         Args:
@@ -148,7 +159,8 @@ class DECT:
 
         Returns:
             The response if received within timeout, None otherwise
-        """
+        """ 
+
         if type(primitive) is not list:
             primitive = [primitive]
 
@@ -172,7 +184,8 @@ class DECT:
             return None
 
     async def sync(self, timeout=1.0):
-        """
+        """ 
+
         Wait for all pending requests to complete.
 
         Args:
@@ -180,7 +193,8 @@ class DECT:
 
         Note:
             This method will wait for all in-flight commands to either complete or timeout.
-        """
+        """ 
+
         if not self.pending_requests:
             logger.info("[DECT] No in-flight commands, nothing to wait for.")
             return

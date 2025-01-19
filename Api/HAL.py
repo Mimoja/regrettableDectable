@@ -6,6 +6,14 @@ from enum import IntEnum
 
 
 class ApiHalDeviceIdType(IntEnum):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Enumeration of HAL device identifiers.
+    Defines identifiers for hardware devices like UART, SPI, timers.
+    """
     AHD_NONE = 0
     AHD_UART1 = 1
     AHD_UART2 = 2

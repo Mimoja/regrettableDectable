@@ -14,6 +14,10 @@ from Api.INFOELEMENT import parseInfoElements
 
 class RsStatusType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of response status types for DECT API commands.
     Defines all possible status codes that can be returned by the DECT device.
     """

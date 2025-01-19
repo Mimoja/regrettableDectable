@@ -2,7 +2,13 @@ from enum import IntEnum
 
 
 class Status(IntEnum):
-    """Enumeration of status codes."""
+    """ 
+    <AI Bullshit Disclaimer>
+    This Comment was hallucinated by a unconcious AI and should not be trusted further than you can throw it.
+    Please verify/modify the Comment and and remove this Disclaimer once you are done.
+    <AI Bullshit Disclaimer />
+(.*)
+"""
 
     SUCCESS = 0x00  # The request completed successfully.
     NOT_SUPPORTED = 0x01  # The request is not supported.

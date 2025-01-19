@@ -5,6 +5,10 @@ from struct import unpack, pack, pack_into
 
 class InfoElements(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of DECT Information Element types.
     Defines all possible information elements that can be exchanged in DECT messages.
     """

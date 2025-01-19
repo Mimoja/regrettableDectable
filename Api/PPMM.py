@@ -19,6 +19,14 @@ from enum import IntEnum
 
 
 class ApiMmSearchModeType(IntEnum):
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    Enumeration of search modes for mobility management.
+    Defines different search strategies for registration and connection.
+    """
     API_MM_CONTINOUS_SEARCH = 0x00
     API_MM_SINGLE_SEARCH = 0x01
 

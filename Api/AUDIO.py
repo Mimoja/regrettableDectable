@@ -8,6 +8,10 @@ from Api.Api import RsStatusType
 
 class ApiPcmFscFreqType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of PCM Frame Sync (FSC) frequencies.
     Defines supported frequencies for PCM synchronization.
     """
