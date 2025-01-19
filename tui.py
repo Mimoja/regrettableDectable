@@ -7,6 +7,10 @@ from ppApi import PpApi, ApiPpUle
 
 async def tui(protocol: Optional[MailProtocol] = None):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Minimal TUI for controlling LEDs.
     """
     console = Console()

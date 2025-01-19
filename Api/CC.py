@@ -25,6 +25,10 @@ class ApiCcBasicServiceType(IntEnum):
 
 class ApiCcCallClassType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of call classes.
     Defines different types of calls like normal, internal, service calls.
     """
@@ -37,6 +41,10 @@ class ApiCcCallClassType(IntEnum):
 
 class ApiCcSignalType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of call control signals.
     Defines various tones and alert patterns used in call control.
     """
@@ -67,6 +75,10 @@ class ApiCcSignalType(IntEnum):
 
 class ApiCcProgressIndType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of call progress indication types.
     Indicates availability of in-band information.
     """
@@ -77,6 +89,10 @@ class ApiCcProgressIndType(IntEnum):
 
 class ApiCcSetupReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call setup request command.
     Used to initiate a new call with specified service and class.
     """
@@ -97,6 +113,10 @@ class ApiCcSetupReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize call setup request.
 
         Args:
@@ -115,6 +135,10 @@ class ApiCcSetupReq(InfoElementCommand):
 
 class ApiCcSetupInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call setup indication command.
     Indicates an incoming call with its characteristics.
     """
@@ -137,6 +161,10 @@ class ApiCcSetupInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize call setup indication.
 
         Args:
@@ -157,6 +185,10 @@ class ApiCcSetupInd(InfoElementCommand):
 
 class ApiCcSetupAckInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call setup acknowledgment indication command.
     Indicates acknowledgment of call setup with progress information.
     """
@@ -177,6 +209,10 @@ class ApiCcSetupAckInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize setup acknowledgment indication.
 
         Args:
@@ -195,6 +231,10 @@ class ApiCcSetupAckInd(InfoElementCommand):
 
 class ApiCcProcInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call proceeding indication command.
     Indicates that call establishment has been initiated.
     """
@@ -215,6 +255,10 @@ class ApiCcProcInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize call proceeding indication.
 
         Args:
@@ -233,6 +277,10 @@ class ApiCcProcInd(InfoElementCommand):
 
 class ApiCcAlertInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call alerting indication command.
     Indicates that the called party is being alerted.
     """
@@ -253,6 +301,10 @@ class ApiCcAlertInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize alerting indication.
 
         Args:
@@ -271,6 +323,10 @@ class ApiCcAlertInd(InfoElementCommand):
 
 class ApiCcConnectInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call connect indication command.
     Indicates that the call has been answered.
     """
@@ -287,6 +343,10 @@ class ApiCcConnectInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize connect indication.
 
         Args:
@@ -301,6 +361,10 @@ class ApiCcConnectInd(InfoElementCommand):
 
 class ApiCcConnectRes(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call connect response command.
     Responds to a connect indication.
     """
@@ -317,6 +381,10 @@ class ApiCcConnectRes(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize connect response.
 
         Args:
@@ -331,6 +399,10 @@ class ApiCcConnectRes(InfoElementCommand):
 
 class ApiCcConnectReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call connect request command.
     Requests to establish a connection.
     """
@@ -347,6 +419,10 @@ class ApiCcConnectReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize connect request.
 
         Args:
@@ -361,6 +437,10 @@ class ApiCcConnectReq(InfoElementCommand):
 
 class ApiCcConnectCfm(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call connect confirmation command.
     Confirms successful connection establishment.
     """
@@ -374,6 +454,10 @@ class ApiCcConnectCfm(BaseCommand):
         con_ei: int,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize connect confirmation.
 
         Args:
@@ -385,6 +469,10 @@ class ApiCcConnectCfm(BaseCommand):
 
 class ApiCcAlertReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call alerting request command.
     Requests to start alerting the called party.
     """
@@ -401,6 +489,10 @@ class ApiCcAlertReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize alerting request.
 
         Args:
@@ -465,6 +557,10 @@ class ApiCcInfoInd(InfoElementCommand):
 
 class ApiCcReleaseReasonType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of call release reason types.
     Defines various reasons for call termination.
     """
@@ -504,6 +600,10 @@ class ApiCcReleaseReasonType(IntEnum):
 
 class ApiCcReleaseReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call release request command.
     Requests to release an established call.
     """
@@ -522,6 +622,10 @@ class ApiCcReleaseReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize release request.
 
         Args:
@@ -538,6 +642,10 @@ class ApiCcReleaseReq(InfoElementCommand):
 
 class ApiCcReleaseCfm(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call release confirmation command.
     Confirms successful call release.
     """
@@ -554,6 +662,10 @@ class ApiCcReleaseCfm(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize release confirmation.
 
         Args:
@@ -568,6 +680,10 @@ class ApiCcReleaseCfm(InfoElementCommand):
 
 class ApiCcReleaseInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call release indication command.
     Indicates that a call has been released.
     """
@@ -602,6 +718,10 @@ class ApiCcReleaseInd(InfoElementCommand):
 
 class ApiCcReleaseRes(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call release response command.
     Responds to a release indication.
     """
@@ -618,6 +738,10 @@ class ApiCcReleaseRes(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize release response.
 
         Args:
@@ -632,6 +756,10 @@ class ApiCcReleaseRes(InfoElementCommand):
 
 class ApiCcRejectInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call reject indication command.
     Indicates that a call has been rejected.
     """
@@ -650,6 +778,10 @@ class ApiCcRejectInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize reject indication.
 
         Args:
@@ -666,6 +798,10 @@ class ApiCcRejectInd(InfoElementCommand):
 
 class ApiCcRejectReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Call reject request command.
     Requests to reject an incoming call.
     """
@@ -684,6 +820,10 @@ class ApiCcRejectReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize reject request.
 
         Args:
@@ -700,6 +840,10 @@ class ApiCcRejectReq(InfoElementCommand):
 
 class ApiCcGetConEiReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Get connection endpoint identifier request command.
     Requests to get a new connection endpoint identifier.
     """
@@ -711,17 +855,31 @@ class ApiCcGetConEiReq(BaseCommand):
 
 class ApiCcGetConEiCfm(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Get connection endpoint identifier confirmation command.
     Confirms allocation of a new connection endpoint identifier.
     """
 
     def __init__(self):
-        """Initialize get connection endpoint identifier confirmation."""
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
+        Initialize get connection endpoint identifier confirmation.
+        """
         self.Primitive = Commands.API_CC_GET_CONEI_CFM
 
 
 class ApiCcConeiChangeInd(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Connection endpoint identifier change indication command.
     Indicates a change in the connection endpoint identifier.
     """
@@ -737,6 +895,10 @@ class ApiCcConeiChangeInd(BaseCommand):
         new_con_ei: int,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize connection endpoint identifier change indication.
 
         Args:
@@ -750,6 +912,10 @@ class ApiCcConeiChangeInd(BaseCommand):
 
 class ApiCcModifyCodecReq(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Modify codec request command.
     Requests to modify the codec settings for an active call.
     """
@@ -766,6 +932,10 @@ class ApiCcModifyCodecReq(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize modify codec request.
 
         Args:
@@ -780,6 +950,10 @@ class ApiCcModifyCodecReq(InfoElementCommand):
 
 class ApiCcModifyCodecCfm(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Modify codec confirmation command.
     Confirms modification of codec settings.
     """
@@ -795,6 +969,10 @@ class ApiCcModifyCodecCfm(BaseCommand):
         status: RsStatusType,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize modify codec confirmation.
 
         Args:
@@ -808,6 +986,10 @@ class ApiCcModifyCodecCfm(BaseCommand):
 
 class ApiCcModifyCodecInd(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Modify codec indication command.
     Indicates a request to modify codec settings.
     """
@@ -824,6 +1006,10 @@ class ApiCcModifyCodecInd(InfoElementCommand):
         info: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize modify codec indication.
 
         Args:
@@ -838,6 +1024,10 @@ class ApiCcModifyCodecInd(InfoElementCommand):
 
 class ApiCcModifyCodecRes(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Modify codec response command.
     Responds to a codec modification request.
     """
@@ -853,6 +1043,10 @@ class ApiCcModifyCodecRes(BaseCommand):
         status: RsStatusType,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize modify codec response.
 
         Args:

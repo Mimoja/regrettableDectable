@@ -12,6 +12,10 @@ logger = logging.getLogger("MailProtocol")
 
 class MailProtocol(asyncio.Protocol):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Implementation of the DECT Mail Protocol over serial communication.
     Handles frame-based communication with sequence numbers and acknowledgments.
 
@@ -24,6 +28,10 @@ class MailProtocol(asyncio.Protocol):
 
     def __init__(self, onMessage):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Initialize the Mail Protocol.
 
         Args:
@@ -43,6 +51,10 @@ class MailProtocol(asyncio.Protocol):
 
     def connection_made(self, transport):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Called when a connection is established.
 
         Args:
@@ -53,6 +65,10 @@ class MailProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Called when data is received from the transport.
 
         Args:
@@ -63,6 +79,10 @@ class MailProtocol(asyncio.Protocol):
 
     def connection_lost(self, exc):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Called when the connection is lost or closed.
 
         Args:
@@ -73,6 +93,10 @@ class MailProtocol(asyncio.Protocol):
 
     def send_sabm(self, pf=True):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Send a SABM (Set Asynchronous Balanced Mode) frame.
         Used for connection establishment and reset.
 
@@ -94,6 +118,10 @@ class MailProtocol(asyncio.Protocol):
 
     def flush_message_queue(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Process queued messages that are waiting to be sent.
         Messages are sent if there's room in the outstanding frames window.
         """
@@ -120,6 +148,10 @@ class MailProtocol(asyncio.Protocol):
 
     def send_information_frame(self, payload: bytes, pf=True):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Queue an information frame for transmission.
 
         Args:
@@ -139,6 +171,10 @@ class MailProtocol(asyncio.Protocol):
 
     def _actually_send_information_frame(self, payload: bytes, pf=True):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Internal method to send an information frame immediately.
 
         Args:
@@ -161,6 +197,10 @@ class MailProtocol(asyncio.Protocol):
 
     def send_supervisory_frame(self, su_id: int, pf=True):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Send a supervisory frame (RR, REJ, RNR).
 
         Args:
@@ -175,6 +215,10 @@ class MailProtocol(asyncio.Protocol):
 
     def send(self, command: BaseCommand, program_id=0, task_id=1):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Send a command using the mail protocol.
 
         Args:
@@ -198,6 +242,10 @@ class MailProtocol(asyncio.Protocol):
         params: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Send a raw command using the mail protocol.
 
         Args:
@@ -217,6 +265,10 @@ class MailProtocol(asyncio.Protocol):
 
     def handle_frame(self, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Process received frame data.
         Handles information frames, supervisory frames, and SABM frames.
 
@@ -345,6 +397,10 @@ class MailProtocol(asyncio.Protocol):
 
     def resend_outstanding_frames(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Retransmit all unacknowledged frames in the outstanding frames queue.
         """
         if not self.outstanding_frames:
@@ -356,6 +412,10 @@ class MailProtocol(asyncio.Protocol):
 
     async def poll_timer(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Timer coroutine to handle frame acknowledgment timeouts.
         Triggers retransmission of unacknowledged frames.
         """

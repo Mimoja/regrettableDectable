@@ -10,17 +10,31 @@ from ctypes import c_uint8, c_uint16, c_uint32, Structure
 
 class ApiPpResetReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to reset the Portable Part (PP).
     Initiates a software reset of the PP device.
     """
 
     def __init__(self):
-        """Initialize reset request command."""
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
+        Initialize reset request command.
+        """
         self.Primitive = Commands.API_PP_RESET_REQ
 
 
 class ApiPpResetInd(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Reset indication from the Portable Part (PP).
     Indicates that a reset has occurred and provides the status.
     """
@@ -42,17 +56,31 @@ class ApiPpResetInd(BaseCommand):
 
 class ApiPpGetFwVersionReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to get firmware version information.
     Retrieves the current firmware version of the PP device.
     """
 
     def __init__(self):
-        """Initialize firmware version request command."""
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
+        Initialize firmware version request command.
+        """
         self.Primitive = Commands.API_PP_GET_FW_VERSION_REQ
 
 
 class ApiPpGetFwVersionCfm(InfoElementCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Confirmation of firmware version request.
     Contains detailed firmware version information including version number,
     link date, DECT type, and additional information elements.
@@ -75,6 +103,10 @@ class ApiPpGetFwVersionCfm(InfoElementCommand):
         info_element: bytes,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize firmware version confirmation.
 
         Args:
@@ -98,6 +130,10 @@ class ApiPpGetFwVersionCfm(InfoElementCommand):
 
 class ApiPpSetCradleStatusReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to set cradle status.
     Updates the current cradle status of the PP device.
     """
@@ -108,6 +144,10 @@ class ApiPpSetCradleStatusReq(BaseCommand):
 
     def __init__(self, cradle_status: int):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize cradle status request.
 
         Args:
@@ -119,17 +159,31 @@ class ApiPpSetCradleStatusReq(BaseCommand):
 
 class ApiPpCradleDetectReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to detect cradle status.
     Initiates detection of whether the PP is currently in its cradle.
     """
 
     def __init__(self):
-        """Initialize cradle detection request command."""
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
+        Initialize cradle detection request command.
+        """
         self.Primitive = Commands.API_PP_CRADLE_DETECT_REQ
 
 
 class ApiTimeDateCodeType(Structure):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Structure representing date and time information.
     Used for storing and transmitting time-related data in DECT communications.
 
@@ -169,6 +223,10 @@ class ApiTimeDateCodeType(Structure):
         time_zone: int,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize time and date code structure.
 
         Args:
@@ -191,6 +249,10 @@ class ApiTimeDateCodeType(Structure):
 
 class ApiPpSetTimeReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to set the time on the PP device.
     Updates the current time and date settings.
     """
@@ -205,6 +267,10 @@ class ApiPpSetTimeReq(BaseCommand):
         self, coding: int, interpretation: int, time_date_code: ApiTimeDateCodeType
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize time setting request.
 
         Args:
@@ -220,17 +286,31 @@ class ApiPpSetTimeReq(BaseCommand):
 
 class ApiPpGetTimeReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to get the current time from the PP device.
     Retrieves the current time and date settings.
     """
 
     def __init__(self):
-        """Initialize time retrieval request command."""
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
+        Initialize time retrieval request command.
+        """
         self.Primitive = Commands.API_PP_GET_TIME_REQ
 
 
 class ApiPpSyncTimeReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Request to synchronize time with another terminal.
     Initiates time synchronization with a specified terminal.
     """
@@ -241,6 +321,10 @@ class ApiPpSyncTimeReq(BaseCommand):
 
     def __init__(self, terminal_id: int):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize time synchronization request.
 
         Args:
@@ -252,6 +336,10 @@ class ApiPpSyncTimeReq(BaseCommand):
 
 class ApiPpSetTimeCfm(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Confirmation of time setting request.
     Indicates the result of a time setting operation.
     """
@@ -262,6 +350,10 @@ class ApiPpSetTimeCfm(BaseCommand):
 
     def __init__(self, status: RsStatusType):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize time setting confirmation.
 
         Args:

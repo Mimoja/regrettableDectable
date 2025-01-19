@@ -1,5 +1,9 @@
 def hexdump(data: bytes, address=True) -> str:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Format bytes as a hexdump string with optional address display.
 
     Args:
@@ -27,6 +31,10 @@ def hexdump(data: bytes, address=True) -> str:
 
 def is_mod8_less(a: int, b: int) -> bool:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Compare two numbers in modulo-8 arithmetic to determine if first is less than second.
 
     Args:

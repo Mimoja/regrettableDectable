@@ -863,6 +863,10 @@ class Commands(IntEnum):
 
 class PtCommand(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of Production Test commands.
     Defines command identifiers for various production testing operations including:
     - System control and configuration

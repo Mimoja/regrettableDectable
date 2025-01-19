@@ -14,14 +14,22 @@ logger = logging.getLogger("DECT")
 
 
 class DECT:
-    """ 
+    """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Main DECT request-response framework.
     Handles communication with DECT devices over serial connection.
     """ 
 
 
     def __init__(self, port, baudrate):
-        """ 
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
 
         Initialize a new DECT connection.
 
@@ -36,7 +44,11 @@ class DECT:
         self.protocol = None
 
     async def connect(self):
-        """ 
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
 
         Establish the serial connection and initialize the protocol.
         Attempts to synchronize SABM (Set Asynchronous Balanced Mode) with retries.
@@ -66,7 +78,11 @@ class DECT:
     async def command(
         self, command: BaseCommand, program_id=0, task_id=1, max_retries=3, timeout=5
     ):
-        """ 
+        
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
 
 
         Send a command to the DECT device and wait for response.
@@ -111,7 +127,10 @@ class DECT:
                     return None
 
     def received(self, primitive, params):
-        """ 
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
 
         Handle received DECT responses.
         Matches responses with pending requests and processes them.
@@ -149,7 +168,10 @@ class DECT:
             )
 
     async def wait_for(self, primitive, timeout=5):
-        """ 
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
 
         Wait for a specific primitive or list of primitives to be received.
 
@@ -184,7 +206,10 @@ class DECT:
             return None
 
     async def sync(self, timeout=1.0):
-        """ 
+        """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
 
         Wait for all pending requests to complete.
 

@@ -3,6 +3,10 @@ import re
 
 class Node:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     A class to hold tree information.
     """
 
@@ -29,6 +33,10 @@ class Node:
 
 def parse_tree_file(filename):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Parse the tree structure from the file and return the root node(s).
     If the file can have multiple top-level nodes, we might store them in a list.
     Otherwise, if there's a single root, we return that Node.
@@ -143,6 +151,10 @@ def parse_tree_file(filename):
 
 def _place_node_in_stack(node, indent_str, stack, roots):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Helper function that uses the current node's indentation and places it
     in the correct parent-child relationship based on the stack.
     """
@@ -180,6 +192,10 @@ known_types = {}
 
 def print_tree(node, level=0, parent_type=None):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Simple recursive printer to show the structure of the parsed tree.
     """
     tree_code = ""

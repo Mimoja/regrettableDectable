@@ -118,6 +118,10 @@ async def reset_nv_storage(dct: DECT):
 
 async def ensure_pp_mode(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Ensure the DECT device is in Portable Part (PP) mode.
     If in Fixed Part (FP) mode, switches to PP mode.
 
@@ -151,6 +155,10 @@ async def ensure_pp_mode(dct: DECT):
 
 async def set_dect_mode(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Set the DECT mode to EU (European) mode.
     If not in EU mode, configures the device and performs necessary reset.
 
@@ -202,6 +210,10 @@ async def set_dect_mode(dct: DECT):
 
 async def lock(dct: DECT, request_lock=False):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Lock or query the lock status of the DECT device.
 
     Args:
@@ -238,6 +250,10 @@ async def lock(dct: DECT, request_lock=False):
 
 async def list_images(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     List all firmware images stored in the DECT device.
     Prints detailed information about each image including status, ID, and metadata.
 
@@ -289,6 +305,10 @@ async def list_images(dct: DECT):
 
 async def blink_led(dct: DECT, led: int):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Make a specific LED on the DECT device blink.
 
     Args:
@@ -319,6 +339,10 @@ async def blink_led(dct: DECT, led: int):
 
 async def auto_register(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Automatically register the DECT device with a base station.
     Attempts registration with default access code.
 
@@ -373,6 +397,10 @@ async def auto_register(dct: DECT):
 
 async def manual_register(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Manually register the DECT device with a base station.
     Scans for base stations and attempts to connect to the first one found.
 
@@ -447,6 +475,10 @@ async def manual_register(dct: DECT):
 
 def parse_call(call: ApiCcSetupInd):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Parse an incoming call setup indication.
     Extracts and prints call information including caller ID, service type, and codecs.
 
@@ -484,6 +516,10 @@ def parse_call(call: ApiCcSetupInd):
 
 async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Read data from a specific EEPROM location.
 
     Args:
@@ -505,6 +541,11 @@ async def read_eeprom(dct: DECT, target: EepromTypes.BaseNode):
 
 async def known_fps(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+        
     Check if there are any known Fixed Parts (base stations) stored in EEPROM.
 
     Args:
@@ -529,6 +570,11 @@ async def known_fps(dct: DECT):
 
 async def config_audio(dct: DECT):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+    
     Configure audio settings for the DECT device.
     Sets up PCM parameters including clock, frequency, and alignment.
 
@@ -563,6 +609,11 @@ async def config_audio(dct: DECT):
 
 async def get_ipei(dct):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+        
     Get and print the International Portable Equipment Identity (IPEI).
     Reads IPEI from EEPROM and formats it as manufacturer and device numbers.
 
@@ -578,6 +629,11 @@ async def get_ipei(dct):
 
 async def main():
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
+        
     Main function that initializes and runs the DECT device operation.
     Sets up the device, handles registration, and manages incoming calls in a loop.
     """

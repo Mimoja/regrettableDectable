@@ -86,6 +86,10 @@ class RsStatusType(IntEnum):
 
 class BaseCommand(Structure):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Base class for all DECT API commands.
     Provides serialization and deserialization functionality for command structures.
 
@@ -105,6 +109,10 @@ class BaseCommand(Structure):
 
     def to_bytes(self) -> bytes:
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Serialize the command to bytes.
 
         Returns:
@@ -116,6 +124,10 @@ class BaseCommand(Structure):
 
     def set_array(self, entry, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Set an array field in the command structure.
         Handles resizing the structure to accommodate variable-length arrays.
 
@@ -144,6 +156,10 @@ class BaseCommand(Structure):
     @staticmethod
     def _set_size(entry, new_size):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Internal method to set the size of a ctypes array.
         Uses low-level memory manipulation to resize arrays.
 
@@ -181,6 +197,10 @@ class BaseCommand(Structure):
     @classmethod
     def from_bytes(cls, data: bytes) -> "BaseCommand":
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Create a command object from bytes.
 
         Args:
@@ -204,6 +224,10 @@ class BaseCommand(Structure):
 
     def primitive(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Get the command's primitive identifier.
 
         Returns:
@@ -213,6 +237,10 @@ class BaseCommand(Structure):
 
     def to_dict(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Convert the command to a dictionary representation.
         Handles special cases for array fields and oversized last fields.
 
@@ -237,6 +265,10 @@ class BaseCommand(Structure):
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Create a string representation of the command.
         Converts numeric values to hexadecimal format.
 
@@ -257,6 +289,10 @@ class BaseCommand(Structure):
     @staticmethod
     def parseDate(date: bytes | list) -> datetime:
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Parse a date from bytes or list format.
 
         Args:
@@ -282,12 +318,20 @@ class BaseCommand(Structure):
 
 class VariableSizeCommand(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command class that supports variable-sized data fields.
     Extends BaseCommand with functionality for handling variable-length data.
     """
 
     def data(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Get the variable-length data from the command.
 
         Returns:
@@ -319,6 +363,10 @@ class VariableSizeCommand(BaseCommand):
 
     def data_bytes(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Get the variable-length data as bytes.
 
         Returns:
@@ -329,6 +377,10 @@ class VariableSizeCommand(BaseCommand):
     @classmethod
     def from_bytes(cls, data: bytes) -> "VariableSizeCommand":
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Create a variable-size command from bytes.
 
         Args:
@@ -349,6 +401,10 @@ class VariableSizeCommand(BaseCommand):
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Create a string representation of the variable-size command.
 
         Returns:
@@ -373,12 +429,20 @@ class VariableSizeCommand(BaseCommand):
 
 class InfoElementCommand(VariableSizeCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Command class that contains information elements.
     Extends VariableSizeCommand with functionality for handling info elements.
     """
 
     def infoElements(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Parse and return the information elements contained in the command.
 
         Returns:

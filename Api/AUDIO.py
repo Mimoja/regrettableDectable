@@ -23,6 +23,10 @@ class ApiPcmFscFreqType(IntEnum):
 
 class ApiPcmFscLengthType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Enumeration of PCM Frame Sync (FSC) pulse lengths.
     Defines different FSC pulse lengths for master and slave modes.
     """
@@ -44,6 +48,10 @@ class ApiPcmFscLengthType(IntEnum):
 
 class ApiPcmClkType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of PCM clock frequencies.
     Defines supported clock frequencies for PCM interface.
     """
@@ -55,6 +63,10 @@ class ApiPcmClkType(IntEnum):
 
 class ApiPpAudioInitPcmReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to initialize PCM audio interface.
     Configures PCM parameters including master/slave mode, clock settings, and timing.
     """
@@ -102,6 +114,10 @@ class ApiPpAudioInitPcmReq(BaseCommand):
         PcmIsOpenDrain,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize PCM audio interface configuration.
 
         Args:
@@ -137,6 +153,10 @@ class ApiPpAudioInitPcmReq(BaseCommand):
 
 class ApiPpAudioInitPcmCfm(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Confirmation response for PCM audio initialization.
     Contains the status of the initialization request.
     """
@@ -159,6 +179,10 @@ class ApiPpAudioInitPcmCfm(BaseCommand):
 
 class ApiPpAudioModeType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of audio output modes.
     Defines different audio routing options and configurations.
     """
@@ -184,6 +208,10 @@ class ApiPpAudioModeType(IntEnum):
 
 class ApiPpAudioOpenReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to open an audio channel.
     Specifies the audio output mode to be used.
     """
@@ -192,6 +220,10 @@ class ApiPpAudioOpenReq(BaseCommand):
 
     def __init__(self, mode: ApiPpAudioModeType):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize audio open request.
 
         Args:
@@ -203,6 +235,10 @@ class ApiPpAudioOpenReq(BaseCommand):
 
 class ApiPpAudioCloseReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to close the currently open audio channel.
     """
 
@@ -213,6 +249,10 @@ class ApiPpAudioCloseReq(BaseCommand):
 
 class ApiPpAudioSetVolumeReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to set audio volume.
     Controls the volume level of the audio output.
     """
@@ -221,6 +261,10 @@ class ApiPpAudioSetVolumeReq(BaseCommand):
 
     def __init__(self, volume: int):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize volume setting request.
 
         Args:
@@ -232,6 +276,10 @@ class ApiPpAudioSetVolumeReq(BaseCommand):
 
 class ApiPpAudioMuteRxTxType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of audio mute options.
     Defines which audio paths can be muted (receive, transmit, or both).
     """
@@ -242,6 +290,10 @@ class ApiPpAudioMuteRxTxType(IntEnum):
 
 class ApiPpAudioMuteReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to mute audio paths.
     Allows muting of receive (speaker) and/or transmit (microphone) paths.
     """
@@ -253,6 +305,10 @@ class ApiPpAudioMuteReq(BaseCommand):
 
     def __init__(self, muteRxTx: ApiPpAudioMuteRxTxType):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize audio mute request.
 
         Args:
@@ -264,6 +320,10 @@ class ApiPpAudioMuteReq(BaseCommand):
 
 class ApiPpAudioUnmuteReq(BaseCommand):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Command to unmute audio paths.
     Allows unmuting of previously muted receive and/or transmit paths.
     """
@@ -275,6 +335,10 @@ class ApiPpAudioUnmuteReq(BaseCommand):
 
     def __init__(self, muteRxTx: ApiPpAudioMuteRxTxType):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize audio unmute request.
 
         Args:

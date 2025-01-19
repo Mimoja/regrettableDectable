@@ -3,6 +3,10 @@ import struct
 
 class BaseNode:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     Base class for all node types.
 
     Every node has:
@@ -16,6 +20,10 @@ class BaseNode:
 
     def __init__(self, offset=0, length=None, end=None):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         :param offset: Starting offset in the data
         :param length: Number of bytes this node occupies
         :param end: Alternative to length; if given, length = end - offset
@@ -27,6 +35,10 @@ class BaseNode:
 
     def from_bytes(self, data: bytes, offset: int = 0) -> int:
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Default no-op implementation.
         Subclasses should override this to parse bytes.
 
@@ -42,6 +54,10 @@ class BaseNode:
 
 class ValueNode(BaseNode):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     A node that wraps a single typed value, e.g. uint8, uint16, uint32, cstring, etc.
     """
 
@@ -49,6 +65,10 @@ class ValueNode(BaseNode):
         self, name, dtype="uint8", value=None, offset=0, length=None, end=None
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         :param name: A logical name for this node
         :param dtype: The data type, e.g. 'uint8', 'uint16', 'uint32', 'cstring'
         :param value: Optional initial value or default
@@ -107,6 +127,10 @@ class ValueNode(BaseNode):
 class ValueArray(BaseNode):
     def __init__(self, name, dtype="uint8", values=[], offset=0, length=None, end=None):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         :param name: A logical name for this node
         :param dtype: The data type, e.g. 'uint8', 'uint16', 'uint32', 'cstring'
         :param value: Optional initial value or default
@@ -167,11 +191,19 @@ class ValueArray(BaseNode):
 
 class StructNode(BaseNode):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     A node that holds multiple named children in a structured way.
     """
 
     def __init__(self, name, offset=0, length=None, end=None, **children):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         :param name: Logical name of this struct node.
         :param offset: Starting offset
         :param length: Number of bytes
@@ -184,6 +216,10 @@ class StructNode(BaseNode):
 
     def __getattr__(self, attr):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Allows dot-access for children.
         If we have a child node "Foo", then self.Foo returns that child node.
         """
@@ -195,6 +231,10 @@ class StructNode(BaseNode):
 
     def from_bytes(self, data: bytes, offset: int = 0) -> int:
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Calls from_bytes on each child in order, updating the offset.
         Returns the final offset after all children are parsed.
 
@@ -216,11 +256,19 @@ class StructNode(BaseNode):
 
 class NodeArray(BaseNode):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+    
     A node type that holds a list of sub-nodes in an array.
     """
 
     def __init__(self, name, nodes=None, offset=0, length=None, end=None):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         :param name: Logical name of this array
         :param nodes: A list of Node objects
         :param offset: Starting offset
@@ -239,6 +287,10 @@ class NodeArray(BaseNode):
 
     def from_bytes(self, data: bytes, offset: int = 0) -> int:
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+    
         Calls from_bytes on each node in the list, updating the offset each time.
         Returns the final offset after parsing all.
 

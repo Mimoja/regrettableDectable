@@ -101,12 +101,20 @@ class InfoElements(IntEnum):
 
 class InfoElement:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Base class for DECT Information Elements.
     Provides functionality for handling information element data and serialization.
     """
 
     def __init__(self, type: int, data: bytes):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize an Information Element.
 
         Args:
@@ -118,6 +126,10 @@ class InfoElement:
 
     def to_bytes(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Serialize the information element to bytes.
 
         Returns:
@@ -134,6 +146,10 @@ class InfoElement:
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create a string representation of the information element.
 
         Returns:
@@ -150,6 +166,10 @@ class InfoElement:
 
 def parseInfoElements(data: bytes):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Parse a sequence of information elements from bytes.
 
     Args:
@@ -172,6 +192,10 @@ def parseInfoElements(data: bytes):
 
 class ApiCodecType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of supported audio codec types.
     Defines codecs with their respective information transfer rates.
     """
@@ -189,6 +213,10 @@ class ApiCodecType(IntEnum):
 
 class ApiNegotiationIndicatorType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of codec negotiation capabilities.
     Indicates whether codec negotiation is possible.
     """
@@ -198,6 +226,10 @@ class ApiNegotiationIndicatorType(IntEnum):
 
 class ApiMacDlcServiceType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of MAC layer DLC service types.
     Defines different MAC layer service configurations.
     """
@@ -211,6 +243,10 @@ class ApiMacDlcServiceType(IntEnum):
 
 class ApiCplaneRoutingType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of C-plane routing types.
     Defines different control plane routing configurations.
     """
@@ -222,6 +258,10 @@ class ApiCplaneRoutingType(IntEnum):
 
 class ApiSlotSizeType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of DECT slot size types.
     Defines different slot sizes for DECT frame structure.
     """
@@ -234,6 +274,10 @@ class ApiSlotSizeType(IntEnum):
 
 class ApiCodecInfoType:
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Class representing codec configuration information.
     Combines codec type with MAC/DLC service, routing, and slot size settings.
     """
@@ -246,6 +290,10 @@ class ApiCodecInfoType:
         slot_size: ApiSlotSizeType,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize codec information.
 
         Args:
@@ -262,6 +310,10 @@ class ApiCodecInfoType:
     @classmethod
     def from_bytes(cls, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create codec information from bytes.
 
         Args:
@@ -275,6 +327,10 @@ class ApiCodecInfoType:
 
     def to_bytes(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Serialize codec information to bytes.
 
         Returns:
@@ -290,6 +346,10 @@ class ApiCodecInfoType:
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create a string representation of codec information.
 
         Returns:
@@ -300,6 +360,10 @@ class ApiCodecInfoType:
 
 class ApiCodecListType(InfoElement):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Information element containing a list of supported codecs.
     Includes negotiation capability and codec configurations.
     """
@@ -310,6 +374,10 @@ class ApiCodecListType(InfoElement):
         codecs: ApiCodecInfoType,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize codec list.
 
         Args:
@@ -323,6 +391,10 @@ class ApiCodecListType(InfoElement):
     @classmethod
     def from_bytes(cls, data: bytes | list):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create codec list from bytes.
 
         Args:
@@ -344,6 +416,10 @@ class ApiCodecListType(InfoElement):
 
     def to_bytes(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Serialize codec list to bytes.
 
         Returns:
@@ -357,6 +433,10 @@ class ApiCodecListType(InfoElement):
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create a string representation of the codec list.
 
         Returns:
@@ -368,6 +448,10 @@ class ApiCodecListType(InfoElement):
 
 class ApiNumberTypeType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of number types.
     Defines different formats for telephone numbers.
     """
@@ -382,6 +466,10 @@ class ApiNumberTypeType(IntEnum):
 
 class ApiNpiType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of Numbering Plan Identification types.
     Defines different numbering plans for addressing.
     """
@@ -401,6 +489,10 @@ class ApiNpiType(IntEnum):
 
 class ApiPresentationIndicatorType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of presentation indicator types.
     Defines whether caller information can be displayed.
     """
@@ -413,6 +505,10 @@ class ApiPresentationIndicatorType(IntEnum):
 
 class ApiScreeningIndicatorType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of screening indicator types.
     Defines the verification status of caller information.
     """
@@ -425,12 +521,20 @@ class ApiScreeningIndicatorType(IntEnum):
 
 class ApiCallingPartyNumber(InfoElement):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Information element containing calling party number information.
     Includes number type, format, and presentation settings.
     """
 
     def __init__(self, number_type, npi, presentation_ind, screening_ind, number):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize calling party number information.
 
         Args:
@@ -450,6 +554,10 @@ class ApiCallingPartyNumber(InfoElement):
     @classmethod
     def from_bytes(cls, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create calling party number information from bytes.
 
         Args:
@@ -470,6 +578,10 @@ class ApiCallingPartyNumber(InfoElement):
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create a string representation of calling party number information.
 
         Returns:
@@ -486,6 +598,10 @@ class ApiCallingPartyNumber(InfoElement):
 
 class ApiUsedAlphabetType(IntEnum):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Enumeration of character encoding types.
     Defines supported character encodings for names.
     """
@@ -496,6 +612,10 @@ class ApiUsedAlphabetType(IntEnum):
 
 class ApiCallingPartyName(InfoElement):
     """
+    AI BULLSHIT WARNING!
+    The below comment was hallucinated by a brainless machine, do NOT trust it.
+    Please remove this Warning upon review / verification of correctness.
+
     Information element containing calling party name information.
     Includes character encoding and presentation settings.
     """
@@ -508,6 +628,10 @@ class ApiCallingPartyName(InfoElement):
         name,
     ):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Initialize calling party name information.
 
         Args:
@@ -525,6 +649,10 @@ class ApiCallingPartyName(InfoElement):
     @classmethod
     def from_bytes(cls, data):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create calling party name information from bytes.
 
         Args:
@@ -541,6 +669,10 @@ class ApiCallingPartyName(InfoElement):
 
     def __str__(self):
         """
+        AI BULLSHIT WARNING!
+        The below comment was hallucinated by a brainless machine, do NOT trust it.
+        Please remove this Warning upon review / verification of correctness.
+
         Create a string representation of calling party name information.
 
         Returns:
