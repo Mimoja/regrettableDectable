@@ -90,6 +90,13 @@ async def reset_pp(dct: DECT):
 
 
 async def reset_nv_storage(dct: DECT):
+    """
+    NV storage is Non-voltile memory on the module
+
+    :param dct: DECT 
+    :return: nothing
+    """ 
+
     print(colored("Resetting NV Storage...", "yellow"))
     await dct.command(ApiProdTestReq(opcode=PtCommand.PT_CMD_NVS_DEFAULT, data=[0x01]))
     await dct.command(ApiPpResetReq(), timeout=20)
@@ -97,6 +104,15 @@ async def reset_nv_storage(dct: DECT):
 
 
 async def ensure_pp_mode(dct: DECT):
+    """
+    makes sure the module is in PortablePart (PP) mode and not FixedPart (FP) mode.
+
+    :param dct: DECT 
+    :return: nothing
+    """
+
+
+
     print(colored("Sending 'API_PP_GET_FW_VERSION' request command...", "yellow"))
     pp_version = await dct.command(ApiPpGetFwVersionReq(), max_retries=2, timeout=2)
 
@@ -115,7 +131,7 @@ async def ensure_pp_mode(dct: DECT):
             await dct.command(ApiImageActivateReq(0x01, False))
             await dct.wait_for(Commands.API_PP_RESET_IND, timeout=30)
         else:
-            print(colored("DECT Chip is in unknown mode", "yellow"))
+            print(colored("DECT Chip is in unknown mode", "red"))
             sys.exit(1)
     else:
         print(colored("DECT Chip is in PP mode", "yellow"))
@@ -123,6 +139,14 @@ async def ensure_pp_mode(dct: DECT):
 
 
 async def set_dect_mode(dct: DECT):
+    """
+    function sets the operation mode of the module and makes sure the NVS does not contain something that should not be there
+    operation mode being Region settings.
+    
+    :param dct: DECT 
+    :return: nothing
+    """ 
+    
     print(
         colored(
             "Requesting Dect mode (API_PROD_TEST_REQ :: PT_CMD_GET_DECT_MODE)", "yellow"
@@ -132,6 +156,10 @@ async def set_dect_mode(dct: DECT):
         ApiProdTestReq(opcode=PtCommand.PT_CMD_GET_DECT_MODE, data=[0x00])
     )
     dect_mode = prod.getParameters()[0]
+
+
+    
+    # Api.PROD contains the DectMode declarations 
 
     if dect_mode == 0xFF:
         print(colored("DECT Mode is 0xFF, resetting NVS first...", "red"))
@@ -157,6 +185,7 @@ async def set_dect_mode(dct: DECT):
             ApiProdTestReq(opcode=PtCommand.PT_CMD_GET_DECT_MODE, data=[0x00])
         )
         dect_mode = prod.getParameters()[0]
+
         print("DECT Mode after setting:", dectMode(dect_mode))
         if dect_mode != DectMode.EU:
             print(colored("Failed to set DECT Mode to EU", "red"))
@@ -167,6 +196,14 @@ async def set_dect_mode(dct: DECT):
 
 
 async def lock(dct: DECT, request_lock=False):
+    """
+    get/set the module lock
+
+    :param dct: DECT 
+    :param request_lock: bool
+    :return: lock state (bool)
+    """ 
+        
     if request_lock:
         print(colored("Requesting Lock...", "yellow"))
     else:
@@ -192,7 +229,16 @@ async def lock(dct: DECT, request_lock=False):
         return False
 
 
-async def list_images(dct: DECT):
+async def show_images(dct: DECT):
+    """
+    show available images on module
+    an image is a configuration like FP or PP mode.
+
+    :param dct: DECT 
+    :return: nothing
+    """ 
+
+
     i = 0
     images = []
     while True:
@@ -447,7 +493,16 @@ async def config_audio(dct: DECT):
         )
 
 
-async def get_ipei(dct):
+async def show_ipei(dct):
+    """
+    The IPEI code is a unique 12-digit code that identifies a DECT terminal in the same way as the IMEI code used for mobile phones. 
+    This code is required by the DECT base to accept the telephone subscription and must be set in the base user profile.
+
+    param1: DECT
+
+    returns: nothing 
+    """
+
     Ipei = await read_eeprom(dct, EepromDef.EepromInRam.Ipei)
     Ipei = Ipei.values
     man = ((Ipei[0] & 0x0F) << 12) + (Ipei[1] << 4) + ((Ipei[2] & 0xF0) >> 4)
@@ -455,7 +510,24 @@ async def get_ipei(dct):
     print(colored("IPEI:", "yellow"), f"{man:05d}", " ", f"{dev:07d}")
 
 
+
+
+
+#   /\_/\
+#  ( o.o )
+#   > ^ <
+#
+# Start here for a fun time!
+
 async def main():
+    """
+    main() is where the fun starts.
+    takes no parameters, returns nothing.
+
+    called by asyncio.run(main()) below, therefor async
+    """
+
+
     logging.getLogger("DECT").setLevel(logging.INFO)
     logging.getLogger("MailProtocol").setLevel(logging.WARNING)
 
@@ -468,10 +540,16 @@ async def main():
 
     # Uncomment to reset the DECT modules NV storage
     # await reset_nv_storage(dct)
-    await get_ipei(dct)
+
+    await show_ipei(dct)
+
+    # Enable PortablePart (PP) mode on the module
     await ensure_pp_mode(dct)
+
+    # Sets Operation Parameters like Region (EU) 
     await set_dect_mode(dct)
-    await list_images(dct)
+
+    await show_images(dct)
     locked = await lock(dct, request_lock=False)
 
     if locked is None:
